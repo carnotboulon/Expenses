@@ -4,5 +4,19 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /resources/
+  static_dir: resources/
 - url: /.*
-  script: expenseWebHandlers.app
+  script: Expenses.app
+  
+builtins:
+- remote_api: on
+# [END handlers]
+
+# [START libraries]
+libraries:
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest
+# [END libraries]

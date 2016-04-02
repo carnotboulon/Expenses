@@ -1,0 +1,163 @@
+{% extends "data_page.html" %}
+
+{% block additionalCSS %}
+<!-- Editable labels X-Editable -->
+	<link href="./resources/JS/jquery-editable/css/jquery-editable.css" rel="stylesheet">
+	<link href="./resources/select2-4.0.0/dist/css/select2.css" rel="stylesheet">
+	<link href="./resources/expenseBook.css" rel="stylesheet">
+{% endblock %}
+
+{% block menu %}
+	<li><a href="./">Home</a></li>
+	<li class="active"><a href="./expenses">Expenses</a></li>
+	<li><a href="./persons">Persons</a></li>
+	<li><a href="./shops">Shops</a></li>
+	<li><a href="./categories">Categories</a></li>
+	<li><a href="./accounts">Accounts</a></li>
+{% endblock %}
+
+{% block title %}Our Expenses{% endblock %}
+
+{% block data %}
+<button id="addButton" type="button" class="btn btn-success">Add</button>
+
+<div class="row">
+	<div class="col-md-12">
+		<table class="table table-striped hoverTable">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Date</th>
+					<th>Shop</th>
+					<th>Category</th>
+					<th>What?</th>
+					<th>Price</th>
+					<th>Bought by?</th>
+					<th>Bought for?</th>
+					<th>Paid with?</th>
+					<th>Recorded By</th>
+					<th>Recorded On</th>					
+				</tr>
+			</thead>
+			<tbody>
+			{% for expense in expenses %}
+				<tr>
+					<td id="index">{{ loop.index }}</td>
+					<td id="date"><a class=href="#" id="date" data-type="date" data-pk="{{ expense.pk }}" data-url="/expenses" data-title="Select date">{{ expense.date }}</a></td>
+					<td id="shop"><a class=href="#" id="shop" data-type="select" data-pk="{{ expense.pk }}" data-url="/expenses" data-title="Select a shop">{{ expense.shop }}</a></td>
+					<td id="category"><a class=href="#" id="category" data-type="select" data-pk="{{ expense.pk }}" data-url="/expenses" data-title="Select a Category">{{ expense.category }}</a></td>
+					<td id="object"><a class=href="#" id="object" data-type="text" data-pk="{{ expense.pk }}" data-url="/expenses" data-title="Define an Object">{{ expense.object }}</a></td>
+					<td id="price"><a class=href="#" id="price" data-type="text" data-pk="{{ expense.pk }}" data-url="/expenses" data-title="Define an Object">{{ expense.price }}</a></td>
+					<td id="buyer"><a class=href="#" id="buyer" data-type="select2" data-value="{{ expense.buyer }}" data-pk="{{ expense.pk }}" data-url="/expenses" data-title="Select the buyer">{{ expense.buyer }}</a></td>
+					<td id="beneficiary"><a href="#" id="beneficiary" data-type="select2" data-value="{{ expense.beneficiary }}" data-url="/expenses" data-pk="{{ expense.pk }}">{{ expense.beneficiary }}</a></td>
+					<td id="account"><a class=href="#" id="account" data-type="select" data-pk="{{ expense.pk }}" data-url="/expenses" data-title="Select an Account">{{ expense.account }}</a></td>
+					<td id="recordedBy">{{ expense.recordedBy }}</td>
+					<td id="recordedOn">{{ expense.recordedOn }}</td>
+				</tr>				
+			{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>
+{% endblock %}
+
+{% block additionalScript %}
+<script src="./resources/JS/combodate.js"></script>
+<script src="./resources/JS/moment.js"></script>
+<!--<script src="./resources/bootstrap/js/bootstrap-datepicker.js"></script>-->
+<script src="./resources/JS/jquery-editable/js/jquery-editable-poshytip.js"></script>
+<!--<script src="./resources/poshytip-1.2/src/jquery.poshytip.js"></script>-->
+<!--Select 2-->
+<script src="./resources/select2-4.0.0/dist/js/select2.full.min.js"></script>  
+<script>
+		//turn to inline mode
+		$.fn.editable.defaults.mode = 'inline';
+		
+		$(document).ready(function() {
+			
+			/*Make Date editable.*/
+			$.each($('a[id^="date"]'), function(){
+				$(this).editable({
+					format: 'yyyy/mm/dd',    
+					viewformat: 'dd/mm/yyyy',    
+					datepicker: {
+						weekStart: 1,
+					}
+				});
+			});
+			
+			/*Make Shop Editable > LIST*/
+			$.each($('a[id^="shop"]'), function(){
+				$(this).editable({
+					source: [
+								{% for shop in shopList %}
+									{ value:'{{ shop.name }}' , text:'{{ shop.name }}'},
+								{% endfor %}
+							]
+				});
+			});
+			
+			/*Make Category Editable > LIST*/
+			$.each($('a[id^="category"]'), function(){
+				$(this).editable({
+					source: [
+								{% for category in categoryList %}
+									{ value:'{{ category.name }}' , text:'{{ category.name }}'},
+								{% endfor %}
+							]
+				});
+			});
+			
+			/*Make Object Editable > TEXT*/
+			$.each($('a[id^="object"]'), function(){
+				$(this).editable();
+			});
+			
+			/*Make Price Editable > TEXT*/
+			$.each($('a[id^="price"]'), function(){
+				$(this).editable();
+			});
+			
+			/*Make Buyer Editable > SELECT2*/
+			$.each($('a[id^="buyer"]'), function(){
+				$(this).editable({
+					source: [
+								{% for person in personList %}
+									{ id:'{{ person.firstName }}' , text:'{{ person.firstName }}'},
+								{% endfor %}
+							],
+					select2:{
+								multiple: true
+							}
+				});
+			});
+			
+			/*Make Beneficiaries Editable > SELECT2*/
+			$.each($('a[id^="beneficiary"]'), function(){
+				$(this).editable({
+					source: [
+								{% for person in personList %}
+									{ id:'{{ person.firstName }}' , text:'{{ person.firstName }}'},
+								{% endfor %}
+							],
+					select2:{
+								multiple: true
+							}
+				});
+			});
+			
+			/*Make Account Editable > LIST*/
+			$.each($('a[id^="account"]'), function(){
+				$(this).editable({
+					source: [
+								{% for account in accountList %}
+									{ value:'{{ account.name }}' , text:'{{ account.name }}'},
+								{% endfor %}
+							]
+				});
+			});
+			
+			
+		});		
+</script>
+{% endblock %}
