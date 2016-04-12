@@ -42,7 +42,7 @@ class Shop(ndb.Model):
 	_use_cache = False
 	_use_memcache = False
 	name = ndb.StringProperty(indexed=True, required = True)
-	location = ndb.GeoPtProperty(indexed=False)
+	#location = ndb.GeoPtProperty(indexed=False)
 
 class ExpenseCategory(ndb.Model):
 	_use_cache = False
@@ -76,7 +76,7 @@ class Expense(ndb.Model):
 	
 	buyer = ndb.KeyProperty(kind='Person', indexed = True, repeated = True, required = True)
 	beneficiary = ndb.KeyProperty(kind='Person', indexed = True, repeated = True, required = True)
-	payType = beneficiary = ndb.KeyProperty(kind='PayementType', indexed = True, required = True)
+	payType = ndb.KeyProperty(kind='PayementType', indexed = True, required = True)
     
 	recordedBy = ndb.KeyProperty(kind='Person', indexed = True, required = True)
 	recordedOn = ndb.DateTimeProperty(auto_now_add=True, indexed = True, required = True)
@@ -98,6 +98,8 @@ class Expense(ndb.Model):
 		expense["recordedBy"] = self.recordedBy.get().surname													# Key
 		expense["recordedOn"] = self.date.strftime("%d-%m-%y %H:%M")
 		return expense
+
+        
 #  [START PAGES]
 class ExpensesPage(webapp2.RequestHandler):
 
@@ -132,7 +134,33 @@ class ExpensesPage(webapp2.RequestHandler):
 		template = JINJA_ENVIRONMENT.get_template('expenses.html')
 		self.response.write(template.render(template_values))
 
+class FeedData(webapp2.RequestHandler):
+
+    def get(self):
+        self.response.write("Bonjour c'est dans la boite.")
+        
+        # p1 = Person("Arnaud","Boland","ABO","arnaudboland@gmail.com")
+        # p1.put()
+        # exp1 = Expense(parent=expensebook_key())
+        # exp1.object = "Sandwich"
+        # exp1.price = 1.5
+        # exp1.currency = Currency(name="Euro",code="EUR")
+        # exp1.shop = Shop(name="Delhaize")    
+        # exp1.category = ExpenseCategory("Alimentation")
+        # exp1.account = BankAccount(p1, "Maestro Privé", "123-456789-11", "Belfius")
+        # exp1.buyer = p1    
+        # exp1.beneficiary = p1    
+        # exp1.payType = PayementType("Cash")
+        # exp1.recordedBy = p1
+        # exp1.put()
+        
+class Test(webapp2.RequestHandler):
+    def get(self):
+        self.response.write("Bonjour test.")
+        
 app = webapp2.WSGIApplication([
     ('/', ExpensesPage),
+    ('/bonjour', FeedData),
+    ('/test', Test),
     
 ], debug=True)

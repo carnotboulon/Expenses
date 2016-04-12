@@ -76,7 +76,7 @@ class Expense(ndb.Model):
 
     buyer = ndb.KeyProperty(kind='Person', indexed = True, repeated = True)
     beneficiary = ndb.KeyProperty(kind='Person', indexed = True, repeated = True)
-    payType = beneficiary = ndb.KeyProperty(kind='PayementType', indexed = True, required = True)
+    payType = ndb.KeyProperty(kind='PayementType', indexed = True, required = True)
 
     recordedBy = ndb.KeyProperty(kind='Person', indexed = True, required = True)
     recordedOn = ndb.DateTimeProperty(auto_now_add=True, indexed = True, required = True)
@@ -113,6 +113,7 @@ class ExpensesPage(webapp2.RequestHandler):
             self.redirect(users.create_login_url(self.request.uri))
         
         expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
+        logging.info(expensebook_name)
         expenses_query = Expense.query(ancestor=expensebook_key(expensebook_name)).order(-Expense.date)
         expenses = expenses_query.fetch()
         expenseList = []
@@ -123,7 +124,7 @@ class ExpensesPage(webapp2.RequestHandler):
             # self.response.write(str(exp.buyer[0].get().firstName)+"<BR />")
             expenseList.append(exp.render())
         
-        logging.info("Bonjour")
+        logging.info("Voici les expenses:")
         logging.info(expenseList)
         
         template_values = {
@@ -136,7 +137,39 @@ class ExpensesPage(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('expenses.html')
         self.response.write(template.render(template_values))
 
+class FeedData(webapp2.RequestHandler):
+
+    def get(self):
+        self.response.write("Bonjour c'est dans la boite.")
+        
+        # p1 = Person(firstName ="Stephanie",lastName ="Thys",surname ="STH",email = "stephanie.thys@gmail.com")
+        # p1.put()
+        # c1 = Currency(name="Dollar US",code="USD")
+        # c1.put()
+        # s1 = Shop(name="Carrefour")
+        # s1.put()
+        # e1 = ExpenseCategory(name = "Travaux")
+        # e1.put()
+        # pt1 = PayementType(type = "Maestro")
+        # pt1.put()
+        # a1 = BankAccount(owner = [p1.key], name = "Steph Prive", number = "123-456789-11", bank = "Fortis")
+        # a1.put()
+        
+        # exp1 = Expense(parent=expensebook_key())
+        # exp1.object = "Sandwich"
+        # exp1.price = 1.5
+        # exp1.currency = c1.key
+        # exp1.shop = s1.key
+        # exp1.category = [e1.key]
+        # exp1.account = a1.key
+        # exp1.buyer = [p1.key]
+        # exp1.beneficiary = [p1.key]    
+        # exp1.payType = pt1.key
+        # exp1.recordedBy = p1.key
+        # exp1.put()
+        
 app = webapp2.WSGIApplication([
     ('/', ExpensesPage),
+    ('/feed', FeedData),
     
 ], debug=True)

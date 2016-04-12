@@ -19,8 +19,6 @@
 {% block title %}Our Expenses{% endblock %}
 
 {% block data %}
-<button id="addButton" type="button" class="btn btn-success">Add</button>
-
 <div class="row">
 	<div class="col-md-12">
 		<table class="table table-striped hoverTable">
@@ -42,17 +40,17 @@
 			<tbody>
 			{% for expense in expenses %}
 				<tr>
-					<td id="index">{{ loop.index }}</td>
-					<td id="date"><a class=href="#" id="date" data-type="date" data-pk="{{ expense.pk }}" data-url="/expenses" data-title="Select date">{{ expense.date }}</a></td>
-					<td id="shop"><a class=href="#" id="shop" data-type="select" data-pk="{{ expense.pk }}" data-url="/expenses" data-title="Select a shop">{{ expense.shop }}</a></td>
-					<td id="category"><a class=href="#" id="category" data-type="select" data-pk="{{ expense.pk }}" data-url="/expenses" data-title="Select a Category">{{ expense.category }}</a></td>
-					<td id="object"><a class=href="#" id="object" data-type="text" data-pk="{{ expense.pk }}" data-url="/expenses" data-title="Define an Object">{{ expense.object }}</a></td>
-					<td id="price"><a class=href="#" id="price" data-type="text" data-pk="{{ expense.pk }}" data-url="/expenses" data-title="Define an Object">{{ expense.price }}</a></td>
-					<td id="buyer"><a class=href="#" id="buyer" data-type="select2" data-value="{{ expense.buyer }}" data-pk="{{ expense.pk }}" data-url="/expenses" data-title="Select the buyer">{{ expense.buyer }}</a></td>
-					<td id="beneficiary"><a href="#" id="beneficiary" data-type="select2" data-value="{{ expense.beneficiary }}" data-url="/expenses" data-pk="{{ expense.pk }}">{{ expense.beneficiary }}</a></td>
-					<td id="account"><a class=href="#" id="account" data-type="select" data-pk="{{ expense.pk }}" data-url="/expenses" data-title="Select an Account">{{ expense.account }}</a></td>
-					<td id="recordedBy">{{ expense.recordedBy }}</td>
-					<td id="recordedOn">{{ expense.recordedOn }}</td>
+					<td>{{ loop.index }}</td>
+					<td>{{ expense.date }}</td>
+					<td>{{ expense.shop }}</td>
+					<td>{{ expense.category }}</td>
+					<td>{{ expense.object }}</td>
+					<td>{{ expense.price }}</td>
+					<td>{{ expense.buyer }}</td>
+					<td>{{ expense.beneficiary }}</td>
+					<td>{{ expense.account }}</td>
+					<td>{{ expense.recordedBy }}</td>
+					<td>{{ expense.recordedOn }}</td>
 				</tr>				
 			{% endfor %}
 			</tbody>
