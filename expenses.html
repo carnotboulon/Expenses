@@ -42,15 +42,15 @@
 				<tr>
 					<td>{{ loop.index }}</td>
 					<td>{{ expense.date }}</td>
-					<td>{{ expense.shop }}</td>
-					<td>{{ expense.category }}</td>
+					<td>{{ expense.shop.name }}</td>
+					<td>{{ expense.category.name }}</td>
 					<td>{{ expense.object }}</td>
 					<td>{{ expense.price }}</td>
-					<td>{{ expense.buyer }}</td>
-					<td>{{ expense.beneficiary }}</td>
-					<td>{{ expense.account }}</td>
-					<td>{{ expense.recordedBy }}</td>
-					<td>{{ expense.recordedOn }}</td>
+					<td>{{ expense.buyer.firstName }}</td>
+					<td>{{ expense.beneficiary.firstName }}</td>
+					<td>{{ expense.account.name }}</td>
+					<td>{{ expense.recordedBy.firstName }}</td>
+					<td>{{ expense.recordedOn.strftime('%d-%m-%Y %H:%m') }}</td>
 				</tr>				
 			{% endfor %}
 			</tbody>

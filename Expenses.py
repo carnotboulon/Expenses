@@ -34,16 +34,16 @@ def props(cls):
     return props
     
 class RenderModel(ndb.Model):
-""" Class that extends ndb.Model to add it a rendering function. This function converts the entity into a dictionary.
-It's used to print an entity in a readable way.  
-"""
+    """ Class that extends ndb.Model to add it a rendering function. This function converts the entity into a dictionary.
+    It's used to print an entity in a readable way.  
+    """
     def __init__(self):
         ndb.Model.__init__(self)
     
     def render(self):
-    """ Represents the entity in a dictionary. Each key is an attribute name and its value is the attribute value.
-    It works recursively. So if an attribute value is another entity, it will be rendered as well.
-    """
+        """ Represents the entity in a dictionary. Each key is an attribute name and its value is the attribute value.
+        It works recursively. So if an attribute value is another entity, it will be rendered as well.
+        """
         attr = {}            
         # for each entity attribute, get the attribute name and its value.
         for a in props(self.__class__):
