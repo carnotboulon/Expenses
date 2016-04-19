@@ -24,7 +24,52 @@ def expensebook_key(expensebook_name=DEFAULT_EXPENSEBOOK_NAME):
     """
     return ndb.Key('Expensebook', expensebook_name)
 
-class Person(ndb.Model):
+def props(cls):
+    """ Returns a list of tuples. Each tuple contains the class attribute name and its value.
+    """
+    keys = [i for i in cls.__dict__.keys() if i[:1] != '_' and not hasattr(cls.__dict__[i],"__call__")]
+    props = []
+    for k in keys:
+        props.append((k, cls.__dict__[k]))
+    return props
+    
+class RenderModel(ndb.Model):
+""" Class that extends ndb.Model to add it a rendering function. This function converts the entity into a dictionary.
+It's used to print an entity in a readable way.  
+"""
+    def __init__(self):
+        ndb.Model.__init__(self)
+    
+    def render(self):
+    """ Represents the entity in a dictionary. Each key is an attribute name and its value is the attribute value.
+    It works recursively. So if an attribute value is another entity, it will be rendered as well.
+    """
+        attr = {}            
+        # for each entity attribute, get the attribute name and its value.
+        for a in props(self.__class__):
+            key = a[0]
+            val = a[1]._get_value(self)
+            # if atribute is not a list, make it a list. This is just to be able to treat list and non list in the same way.
+            if type(val) is not list:
+                val = [val]
+            elements = []
+            for el in val:
+                # if attribute value is a string, a float, a date or a time, use it as it is.
+                if type(el) == unicode or type(el) == float or type(el) == datetime.date or type(el) == datetime.datetime:
+                    elements.append(el)
+                # else if attribute value is not none, it is a key (a reference to another entity) => get its value from Datastore.
+                elif el is not None:
+                    elements.append(el.get().render())
+                else:
+                    elements.append("")
+            # if list conatins only 1 element, remove it from the list.
+            if len(elements) == 1:
+                attr[key] = elements[0]
+            else:
+                attr[key] = elements
+        return attr
+    
+class Person(RenderModel):
     _use_cache = False
     _use_memcache = False
     firstName = ndb.StringProperty(indexed=True)
@@ -32,24 +77,29 @@ class Person(ndb.Model):
     surname = ndb.StringProperty(indexed=True)		
     email = ndb.StringProperty(indexed=True)	# Key Name
 
-class Currency(ndb.Model):
+    
+class Currency(RenderModel):
     _use_cache = False
     _use_memcache = False
     name = ndb.StringProperty(indexed = False, required = True)
     code = ndb.StringProperty(indexed = True, required = True) 
 
-class Shop(ndb.Model):
+   
+        
+class Shop(RenderModel):
     _use_cache = False
     _use_memcache = False
     name = ndb.StringProperty(indexed=True, required = True)
     location = ndb.GeoPtProperty(indexed=False)
 
-class ExpenseCategory(ndb.Model):
+   
+    
+class ExpenseCategory(RenderModel):
     _use_cache = False
     _use_memcache = False
     name = ndb.StringProperty(indexed=True, required = True)
 
-class BankAccount(ndb.Model):
+class BankAccount(RenderModel):
     _use_cache = False
     _use_memcache = False
     owner = ndb.KeyProperty(kind='Person', indexed = True, repeated = True)
@@ -57,12 +107,12 @@ class BankAccount(ndb.Model):
     number = ndb.StringProperty(indexed = True, required = True)
     bank = ndb.StringProperty(indexed = False, required = True)
     
-class PayementType(ndb.Model):
+class PayementType(RenderModel):
     _use_cache = False
     _use_memcache = False
     type = ndb.StringProperty(indexed = True, required = True)
 
-class Expense(ndb.Model):
+class Expense(RenderModel):
     _use_cache = False
     _use_memcache = False
     date = ndb.DateProperty(auto_now_add = True, indexed =  True, required = True)	# Expense date.
@@ -81,23 +131,7 @@ class Expense(ndb.Model):
     recordedBy = ndb.KeyProperty(kind='Person', indexed = True, required = True)
     recordedOn = ndb.DateTimeProperty(auto_now_add=True, indexed = True, required = True)
 
-    def render(self):
-        expense = {}
-        expense["key"] = self.key.id()
-        expense["pk"] = self.key.urlsafe()
-        expense["date"] = self.date.strftime("%d-%m-%y")
-        expense["object"] = self.object
-        # expense["price"] = "%.2f %s" % (self.price,self.currency.code)
-        expense["price"] = "%.2f" % (self.price)
-        expense["currency"] = self.currency.get().code														# Key
-        expense["shop"] = self.shop.get().name																# Key
-        expense["category"] = ",".join(sorted([cat.get().name for cat in self.category]))						# Key
-        expense["account"] = self.account.get().name															# Key
-        expense["buyer"] = ",".join(sorted([buyer.get().firstName for buyer in self.buyer]))					# Key
-        expense["beneficiary"] = ",".join(sorted([benef.get().firstName for benef in self.beneficiary])) 		# Key
-        expense["recordedBy"] = self.recordedBy.get().surname													# Key
-        expense["recordedOn"] = self.date.strftime("%d-%m-%y %H:%M")
-        return expense
+    
 
 #  [START PAGES]
 class ExpensesPage(webapp2.RequestHandler):
@@ -125,7 +159,10 @@ class ExpensesPage(webapp2.RequestHandler):
             expenseList.append(exp.render())
         
         logging.info("Voici les expenses:")
-        logging.info(expenseList)
+        for exp in expenseList:
+            for k in exp.keys():
+                logging.info("%s => %s" % (k,exp[k]))
+                
         
         template_values = {
             'expenses': expenseList,
@@ -137,6 +174,37 @@ class ExpensesPage(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('expenses.html')
         self.response.write(template.render(template_values))
 
+class AddExpense(webapp2.RequestHandler):
+    def get(self):
+        # Get data.
+        expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
+        
+        shops = Shop.query().fetch()
+        logging.info("Shops: %s" % shops)
+        cur = Currency.query().fetch()
+        logging.info("Currencies: %s" % cur)
+        cat = ExpenseCategory.query().fetch()
+        logging.info("Cats: %s" % cat)
+        pers = Person.query().fetch()
+        logging.info("Persons: %s" % pers)
+        accounts = BankAccount.query().fetch()
+        logging.info("Accounts: %s" % accounts)
+        
+        template_values = {
+            'shopList': shops,
+            'categoryList': cat,
+            'personList': pers,
+            'accountList': accounts
+        }
+        template = JINJA_ENVIRONMENT.get_template('add.html')
+        self.response.write(template.render(template_values))
+        
+        
+        
+    
+    # def post(self):
+        # pass
+        
 class FeedData(webapp2.RequestHandler):
 
     def get(self):
@@ -171,5 +239,6 @@ class FeedData(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
     ('/', ExpensesPage),
     ('/feed', FeedData),
+    ('/add', AddExpense),
     
 ], debug=True)

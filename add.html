@@ -1,0 +1,51 @@
+{% extends "mobile_page.html" %}
+
+{% block data %}
+<div class="row">
+    <div class="col-md-12">
+        <table>
+            <tr>
+                <td>Shops</td>
+            </tr>
+            {% for shop in shopList %}
+            <tr>
+                <td>{{ shop.name }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <table>
+            <tr>
+                <td>Categories</td>
+            </tr>
+            {% for cat in categoryList %}
+            <tr>
+                <td>{{ cat.name }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <table>
+            <tr>
+                <td>Persons</td>
+            </tr>
+            {% for pers in personList %}
+            <tr>
+                <td>{{ pers.firstName }}</td>
+                <td>{{ pers.lastName }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        
+        <table>
+            <tr>
+                <td>Accounts</td>
+            </tr>
+            {% for ac in accountList %}
+            <tr>
+                <td>{{ ac.name }}</td>
+                <td>{{ ac.owner }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}
