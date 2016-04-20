@@ -179,15 +179,19 @@ class AddExpense(webapp2.RequestHandler):
         # Get data.
         expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
         
-        shops = Shop.query().fetch()
+        shops = [s.render() for s in Shop.query().fetch()]
         logging.info("Shops: %s" % shops)
-        cur = Currency.query().fetch()
+        
+        cur = [c.render() for c in Currency.query().fetch()]
         logging.info("Currencies: %s" % cur)
-        cat = ExpenseCategory.query().fetch()
+        
+        cat = [c.render() for c in ExpenseCategory.query().fetch()]
         logging.info("Cats: %s" % cat)
-        pers = Person.query().fetch()
+        
+        pers = [p.render() for p in Person.query().fetch()]
         logging.info("Persons: %s" % pers)
-        accounts = BankAccount.query().fetch()
+        
+        accounts = [a.render() for a in BankAccount.query().fetch()]
         logging.info("Accounts: %s" % accounts)
         
         template_values = {

@@ -1,51 +1,87 @@
 {% extends "mobile_page.html" %}
 
 {% block data %}
+        <nav class="navbar navbar-fixed-top bg-primary">
+          <a class="navbar-brand" style="color:white;">Ajouter une dépense</a>
+        </nav>
 <div class="row">
-    <div class="col-md-12">
-        <table>
-            <tr>
-                <td>Shops</td>
-            </tr>
-            {% for shop in shopList %}
-            <tr>
-                <td>{{ shop.name }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        <table>
-            <tr>
-                <td>Categories</td>
-            </tr>
-            {% for cat in categoryList %}
-            <tr>
-                <td>{{ cat.name }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        <table>
-            <tr>
-                <td>Persons</td>
-            </tr>
-            {% for pers in personList %}
-            <tr>
-                <td>{{ pers.firstName }}</td>
-                <td>{{ pers.lastName }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        
-        <table>
-            <tr>
-                <td>Accounts</td>
-            </tr>
-            {% for ac in accountList %}
-            <tr>
-                <td>{{ ac.name }}</td>
-                <td>{{ ac.owner }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+    <div class="col-md-6 col-md-offset-3">  
+        <form class="form">
+      
+            <div class="form-group row">
+                <label class="col-md-2 form-control-label" for="formGroupExampleInput">Objet</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" id="formGroupExampleInput" placeholder="Achat">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-md-2 form-control-label" for="exampleInputAmount">Prix</label>
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <div class="input-group-addon">&euro;</div>
+                        <input type="number" class="form-control number" id="InputAmount" placeholder="Euro">
+                        <div class="input-group-addon">.</div>
+                        <input type="number" class="form-control" id="InputDecimalAmount" placeholder="Cents">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-md-2 form-control-label" for="exampleSelect1">Magasin</label>
+                <div class="col-md-10">
+                    <select class="form-control col-md-10" id="exampleSelect1">
+                        {% for shop in shopList %}
+                            <option>{{ shop.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label class="col-md-2 form-control-label" for="exampleSelect1">Payé avec</label>
+                <div class="col-md-10">
+                    <select class="form-control" id="exampleSelect1">
+                        {% for account in accountList %}
+                            <option>{{ account.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label class="col-md-2 form-control-label" for="exampleSelect1">Cat&eacute;gorie</label>
+                <div class="col-md-10">
+                    <select class="form-control" id="exampleSelect1" size=2>
+                        {% for cat in categoryList %}
+                            <option>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label class="col-md-2 form-control-label" for="exampleSelect2">Acheté pour</label>
+                <div class="col-md-10">
+                    <select multiple class="form-control" id="exampleSelect2" size=2>
+                        {% for p in personList %}
+                            <option>{{ p.firstName }} {{ p.lastName }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group row">
+                <label class="col-md-2 form-control-label" for="exampleSelect2">Acheté par</label>
+                <div class="col-md-10">
+                    <select multiple class="form-control" id="exampleSelect2" size=2>
+                        {% for p in personList %}
+                            <option>{{ p.firstName }} {{ p.lastName }}</option>
+                        {% endfor %}
+                    </select>
+                 </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">Save</button>
+        </form>
     </div>
 </div>
 {% endblock %}
