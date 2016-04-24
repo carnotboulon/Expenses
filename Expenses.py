@@ -1,7 +1,7 @@
 # [START imports]
 from google.appengine.api import users
 from google.appengine.ext import ndb
-import os, datetime, webapp2, logging
+import os, datetime, webapp2, logging, urllib
 
 import jinja2
 import webapp2
@@ -37,8 +37,8 @@ class RenderModel(ndb.Model):
     """ Class that extends ndb.Model to add it a rendering function. This function converts the entity into a dictionary.
     It's used to print an entity in a readable way.  
     """
-    def __init__(self):
-        ndb.Model.__init__(self)
+    def __init__(self, **kwargs):
+        ndb.Model.__init__(self, **kwargs)
     
     def render(self):
         """ Represents the entity in a dictionary. Each key is an attribute name and its value is the attribute value.
@@ -50,8 +50,10 @@ class RenderModel(ndb.Model):
             key = a[0]
             val = a[1]._get_value(self)
             # if atribute is not a list, make it a list. This is just to be able to treat list and non list in the same way.
+            isList = True
             if type(val) is not list:
                 val = [val]
+                isList = False
             elements = []
             for el in val:
                 # if attribute value is a string, a float, a date or a time, use it as it is.
@@ -62,8 +64,13 @@ class RenderModel(ndb.Model):
                     elements.append(el.get().render())
                 else:
                     elements.append("")
-            # if list conatins only 1 element, remove it from the list.
-            if len(elements) == 1:
+            # if list contains only 1 element, remove it from the list.
+            # if len(elements) == 1:
+                # attr[key] = elements[0]
+            # else:
+                # attr[key] = elements
+            # If was not a list, remove list. 
+            if not isList:
                 attr[key] = elements[0]
             else:
                 attr[key] = elements
@@ -77,14 +84,11 @@ class Person(RenderModel):
     surname = ndb.StringProperty(indexed=True)		
     email = ndb.StringProperty(indexed=True)	# Key Name
 
-    
 class Currency(RenderModel):
     _use_cache = False
     _use_memcache = False
     name = ndb.StringProperty(indexed = False, required = True)
-    code = ndb.StringProperty(indexed = True, required = True) 
-
-   
+    code = ndb.StringProperty(indexed = True, required = True)
         
 class Shop(RenderModel):
     _use_cache = False
@@ -92,8 +96,6 @@ class Shop(RenderModel):
     name = ndb.StringProperty(indexed=True, required = True)
     location = ndb.GeoPtProperty(indexed=False)
 
-   
-    
 class ExpenseCategory(RenderModel):
     _use_cache = False
     _use_memcache = False
@@ -121,11 +123,11 @@ class Expense(RenderModel):
     currency = ndb.KeyProperty(kind='Currency', required = True)
 
     shop = ndb.KeyProperty(kind='Shop', indexed = True, required = True)
-    category = ndb.KeyProperty(kind='ExpenseCategory', indexed = True, repeated = True)
+    categories = ndb.KeyProperty(kind='ExpenseCategory', indexed = True, repeated = True)
     account = ndb.KeyProperty(kind='BankAccount', indexed = True, required = True)
 
-    buyer = ndb.KeyProperty(kind='Person', indexed = True, repeated = True)
-    beneficiary = ndb.KeyProperty(kind='Person', indexed = True, repeated = True)
+    buyers = ndb.KeyProperty(kind='Person', indexed = True, repeated = True )    
+    beneficiaries = ndb.KeyProperty(kind='Person', indexed = True, repeated = True)
     payType = ndb.KeyProperty(kind='PayementType', indexed = True, required = True)
 
     recordedBy = ndb.KeyProperty(kind='Person', indexed = True, required = True)
@@ -139,37 +141,30 @@ class ExpensesPage(webapp2.RequestHandler):
     def get(self):
         # Checks for active Google account session
         user = users.get_current_user()
-
-        if user:
-            self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
-            #self.response.write('Hello, ' + user.nickname())
-        else:
+        if not user:
             self.redirect(users.create_login_url(self.request.uri))
         
         expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
-        logging.info(expensebook_name)
+        # logging.info(expensebook_name)
         expenses_query = Expense.query(ancestor=expensebook_key(expensebook_name)).order(-Expense.date)
         expenses = expenses_query.fetch()
         expenseList = []
         for exp in expenses:
-            # self.response.write(str(exp.object)+"<BR />")
-            # self.response.write(str(exp.price)+"<BR />")
-            # self.response.write(str(exp.category[0].get().name)+"<BR />")
-            # self.response.write(str(exp.buyer[0].get().firstName)+"<BR />")
             expenseList.append(exp.render())
         
-        logging.info("Voici les expenses:")
-        for exp in expenseList:
-            for k in exp.keys():
-                logging.info("%s => %s" % (k,exp[k]))
-                
+        # logging.info("Voici les expenses:")
+        # for exp in expenseList:
+            # logging.info(exp)
+            # # for k in exp.keys():
+                # # logging.info("%s => %s" % (k,exp[k]))
         
         template_values = {
             'expenses': expenseList,
             'shopList': "",
             'categoryList': "",
             'personList': "",
-            'accountList': ""
+            'accountList': "",
+            'typeList':""
         }
         template = JINJA_ENVIRONMENT.get_template('expenses.html')
         self.response.write(template.render(template_values))
@@ -180,69 +175,116 @@ class AddExpense(webapp2.RequestHandler):
         expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
         
         shops = [s.render() for s in Shop.query().fetch()]
-        logging.info("Shops: %s" % shops)
+        # logging.info("Shops: %s" % shops)
         
         cur = [c.render() for c in Currency.query().fetch()]
-        logging.info("Currencies: %s" % cur)
+        # logging.info("Currencies: %s" % cur)
         
         cat = [c.render() for c in ExpenseCategory.query().fetch()]
-        logging.info("Cats: %s" % cat)
+        # logging.info("Cats: %s" % cat)
         
         pers = [p.render() for p in Person.query().fetch()]
-        logging.info("Persons: %s" % pers)
+        # logging.info("Persons: %s" % pers)
         
         accounts = [a.render() for a in BankAccount.query().fetch()]
-        logging.info("Accounts: %s" % accounts)
+        # logging.info("Accounts: %s" % accounts)
+        
+        payTypes = [t.render() for t in PayementType.query().fetch()]
         
         template_values = {
             'shopList': shops,
             'categoryList': cat,
             'personList': pers,
-            'accountList': accounts
+            'accountList': accounts,
+            'typeList': payTypes
         }
         template = JINJA_ENVIRONMENT.get_template('add.html')
         self.response.write(template.render(template_values))
         
+    def post(self):
+        # expense = Expense(parent=expensebook_key(self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)))
+        user = users.get_current_user()
+        if user:
+            self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+            self.response.write('Hello, ' + user.nickname())
+        else:
+            self.redirect(users.create_login_url(self.request.uri))
         
         
-    
-    # def post(self):
-        # pass
+        expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
+        
+        # logging.info("User: %s" % user.email())
+        # logging.info("Expense Book Key: %s" % expensebook_key(expensebook_name))
+        
+        expense = Expense(parent=expensebook_key(expensebook_name))
+        # logging.info("Object: %s" % self.request.get('object'))
+        # logging.info("Price: %s" % float("%s.%s" % (self.request.get('price'), self.request.get('decimalPrice'))))
+        # logging.info("Shop: %s" % self.request.get('shop'))
+        # logging.info("Categories: %s" % self.request.get_all('categories'))
+        # logging.info("Accounts: %s" % self.request.get_all('account'))
+        # logging.info("Beneficiaries: %s" % self.request.get_all('paidFor'))
+        
+        expense.object = self.request.get('object')
+        expense.price = float("%s.%s" % (self.request.get('price'), self.request.get('decimalPrice')))
+        expense.currency = Currency.query(Currency.code == "EUR").get().key
+        expense.shop = Shop.query(Shop.name == self.request.get('shop')).get().key
+        
+        cats = self.request.get_all('categories')
+        catObjects = [ExpenseCategory.query(ExpenseCategory.name == c) for c in cats]
+        expense.categories = [cat.get().key for cat in catObjects]
+        expense.account = BankAccount.query(BankAccount.name == self.request.get('account')).get().key
+        
+        benefs = self.request.get_all('paidFor')
+        benefObjects = [Person.query(ndb.AND(Person.firstName == b.split()[0], Person.lastName == b.split()[1])) for b in benefs]
+        benefKeys = [pers.get().key for pers in benefObjects]
+        expense.beneficiaries = benefKeys
+        
+        # logging.info("Account owner: %s" % BankAccount.query(BankAccount.name == self.request.get('account')).get().owner)
+        expense.buyers = BankAccount.query(BankAccount.name == self.request.get('account')).get().owner
+        
+        expense.payType = PayementType.query(PayementType.type == self.request.get('payType')).get().key
+        expense.recordedBy = Person.query(Person.email == user.email()).get().key
+        
+        # logging.info("Expense: %s" % expense.render())
+        expense.put()
+        
+        query_params = {'expensebook_name': expensebook_name}
+        self.redirect('/?' + urllib.urlencode(query_params))
         
 class FeedData(webapp2.RequestHandler):
 
     def get(self):
         self.response.write("Bonjour c'est dans la boite.")
         
-        # p1 = Person(firstName ="Stephanie",lastName ="Thys",surname ="STH",email = "stephanie.thys@gmail.com")
-        # p1.put()
-        # c1 = Currency(name="Dollar US",code="USD")
-        # c1.put()
-        # s1 = Shop(name="Carrefour")
-        # s1.put()
-        # e1 = ExpenseCategory(name = "Travaux")
-        # e1.put()
-        # pt1 = PayementType(type = "Maestro")
-        # pt1.put()
-        # a1 = BankAccount(owner = [p1.key], name = "Steph Prive", number = "123-456789-11", bank = "Fortis")
-        # a1.put()
+        p1 = Person(firstName ="Stephanie",lastName ="Thys",surname ="STH",email = "stephanie.thys@gmail.com")
+        p1.put()
+        c1 = Currency(name="Dollar US",code="USD")
+        c1.put()
+        s1 = Shop(name="Carrefour")
+        s1.put()
+        e1 = ExpenseCategory(name = "Travaux")
+        e1.put()
+        pt1 = PayementType(type = "Maestro")
+        pt1.put()
+        a1 = BankAccount(owner = [p1.key], name = "Steph Prive", number = "123-456789-11", bank = "Fortis")
+        a1.put()
         
-        # exp1 = Expense(parent=expensebook_key())
-        # exp1.object = "Sandwich"
-        # exp1.price = 1.5
-        # exp1.currency = c1.key
-        # exp1.shop = s1.key
-        # exp1.category = [e1.key]
-        # exp1.account = a1.key
-        # exp1.buyer = [p1.key]
-        # exp1.beneficiary = [p1.key]    
-        # exp1.payType = pt1.key
-        # exp1.recordedBy = p1.key
-        # exp1.put()
+        exp1 = Expense(parent=expensebook_key())
+        exp1.object = "Sandwich"
+        exp1.price = 1.5
+        exp1.currency = c1.key
+        exp1.shop = s1.key
+        exp1.category = [e1.key]
+        exp1.account = a1.key
+        exp1.buyer = [p1.key]
+        exp1.beneficiary = [p1.key]    
+        exp1.payType = pt1.key
+        exp1.recordedBy = p1.key
+        exp1.put()
         
 app = webapp2.WSGIApplication([
     ('/', ExpensesPage),
-    ('/feed', FeedData),
+    # ('/feed', FeedData),
     ('/add', AddExpense),
     
 ], debug=True)
