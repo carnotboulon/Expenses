@@ -57,7 +57,7 @@ class RenderModel(ndb.Model):
             elements = []
             for el in val:
                 # if attribute value is a string, a float, a date or a time, use it as it is.
-                if type(el) == unicode or type(el) == float or type(el) == datetime.date or type(el) == datetime.datetime:
+                if type(el) == unicode or type(el) == float or type(el) == datetime.date or type(el) == datetime.datetime or type(el) == int:
                     elements.append(el)
                 # else if attribute value is not none, it is a key (a reference to another entity) => get its value from Datastore.
                 elif el is not None:
@@ -126,15 +126,75 @@ class Expense(RenderModel):
     categories = ndb.KeyProperty(kind='ExpenseCategory', indexed = True, repeated = True)
     account = ndb.KeyProperty(kind='BankAccount', indexed = True, required = True)
 
-    buyers = ndb.KeyProperty(kind='Person', indexed = True, repeated = True )    
+    buyers = ndb.KeyProperty(kind='Person', indexed = True, repeated = True )
+    nb_buyers = ndb.ComputedProperty(lambda e: len(e.buyers))
     beneficiaries = ndb.KeyProperty(kind='Person', indexed = True, repeated = True)
+    nb_beneficiaries =  ndb.ComputedProperty(lambda e: len(e.beneficiaries))
+                        
     payType = ndb.KeyProperty(kind='PayementType', indexed = True, required = True)
 
     recordedBy = ndb.KeyProperty(kind='Person', indexed = True, required = True)
     recordedOn = ndb.DateTimeProperty(auto_now_add=True, indexed = True, required = True)
+ 
+def sumAttribute(itemList, attribute):
+    sum = 0
+    for item in itemList:
+        sum += float(getattr(item, attribute))
+    return sum
 
+def getExpenseByPerson(personEmail):
+    p = Person.query(Person.email == personEmail).get()
+    logging.info("Expenses from : %s %s" % (p.firstName, p.lastName))
+    expenses = Expense.query(Expense.buyers == p.key).fetch()
     
+    amount = 0.
+    weight = 0.
+    for exp in expenses:
+        weight = 0
+        if p.key in exp.beneficiaries:
+            weight = 1. / exp.nb_beneficiaries
+        else:
+            weight = 1.
+        part = exp.price * weight
+        logging.info("Sub total =  %s" % (part))
+        amount += part
+    
+    logging.info("Total Amount = %s" % (amount))
+    return amount
 
+
+def computeBalance(expensebook_name):
+    pers = Person.query().fetch()
+    # logging.info([p.key.id() for p in pers])
+    persDict = {}
+    for p in pers:
+        persDict[p.key.id()] = {"exp": 0., "benef": 0.}
+    
+    # logging.info(persDict)
+    expenses = Expense.query(ancestor = expensebook_key(expensebook_name))
+    
+    for exp in expenses:
+        # for each expense,
+        # compute each buyer's apport,
+        # logging.info("*** DEPENSE")
+        for buyer in exp.buyers:
+            # logging.info("Comptes %s = %s avant: %s" % (buyer.get().email, buyer.id(), persDict[buyer.id()]))
+            # logging.info("Exp: %s EUR" % (float(exp.price / exp.nb_buyers)))
+            persDict[buyer.id()]["exp"] += float(exp.price / exp.nb_buyers)
+            # logging.info("Comptes %s apres: %s" % (buyer.get().email, persDict[buyer.id()]))
+               
+        # compute each beneficiary part.
+        for benef in exp.beneficiaries:
+            # logging.info("Comptes %s = %s avant: %s" % (benef.get().email, benef.id(), persDict[benef.id()]))
+            # logging.info("Benef: %s EUR" % (float(exp.price / exp.nb_beneficiaries)))
+            persDict[benef.id()]["benef"] += float(exp.price / exp.nb_beneficiaries)
+            # logging.info("Comptes %s apres: %s" % (benef.get().email, persDict[benef.id()]))
+            
+    return persDict
+    
+def getBalanceBetweenPersons(personA, personB):
+    pass
+    
 #  [START PAGES]
 class ExpensesPage(webapp2.RequestHandler):
 
@@ -145,7 +205,6 @@ class ExpensesPage(webapp2.RequestHandler):
             self.redirect(users.create_login_url(self.request.uri))
         
         expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
-        # logging.info(expensebook_name)
         expenses_query = Expense.query(ancestor=expensebook_key(expensebook_name)).order(-Expense.date)
         expenses = expenses_query.fetch()
         expenseList = []
@@ -169,6 +228,33 @@ class ExpensesPage(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('expenses.html')
         self.response.write(template.render(template_values))
 
+class BalancePage(webapp2.RequestHandler):
+
+    def get(self):
+        expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
+        
+        comptes = computeBalance(expensebook_name)
+        # logging.info("%s" % (comptes))
+        for k in comptes.keys():
+            logging.info("%s" % (k))
+            logging.info("\ta paye : %s" % (comptes[k]["exp"]))
+            logging.info("\ta beneficie : %s" % (comptes[k]["benef"]))
+        
+        # logging.info(stephanieForArnaud.fetch())
+        # for exp in stephanieExpenses:
+            # logging.info("%s: %s buyers, %s benefs" % (exp.object, exp.nb_buyers, exp.nb_beneficiaries))
+        
+        # template_values = {
+            # 'expenses': expenseList,
+            # 'shopList': "",
+            # 'categoryList': "",
+            # 'personList': "",
+            # 'accountList': "",
+            # 'typeList':""
+        # }
+        # template = JINJA_ENVIRONMENT.get_template('expenses.html')
+        # self.response.write(template.render(template_values))
+        
 class AddExpense(webapp2.RequestHandler):
     def get(self):
         # Get data.
@@ -286,5 +372,6 @@ app = webapp2.WSGIApplication([
     ('/', ExpensesPage),
     # ('/feed', FeedData),
     ('/add', AddExpense),
+    ('/balance', BalancePage),
     
 ], debug=True)
