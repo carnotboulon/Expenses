@@ -6,6 +6,7 @@ import os, datetime, webapp2, logging, urllib
 import jinja2
 import webapp2
 
+
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
     extensions=['jinja2.ext.autoescape'],
@@ -13,6 +14,7 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 # [END imports]
 
 DEFAULT_EXPENSEBOOK_NAME = 'BandP'
+
 
 # We set a parent key on the 'Greetings' to ensure that they are all
 # in the same entity group. Queries across the single entity group
@@ -44,7 +46,8 @@ class RenderModel(ndb.Model):
         """ Represents the entity in a dictionary. Each key is an attribute name and its value is the attribute value.
         It works recursively. So if an attribute value is another entity, it will be rendered as well.
         """
-        attr = {}            
+        attr = {}
+        attr["id"] = self.key.urlsafe()              #self.key.id()
         # for each entity attribute, get the attribute name and its value.
         for a in props(self.__class__):
             key = a[0]
@@ -117,7 +120,7 @@ class PayementType(RenderModel):
 class Expense(RenderModel):
     _use_cache = False
     _use_memcache = False
-    date = ndb.DateProperty(auto_now_add = True, indexed =  True, required = True)	# Expense date.
+    date = ndb.DateProperty(indexed =  True, required = True)	# Expense date.
     object = ndb.StringProperty(indexed = True, required = True)
     price = ndb.FloatProperty(indexed = True, required = True)
     currency = ndb.KeyProperty(kind='Currency', required = True)
@@ -134,7 +137,7 @@ class Expense(RenderModel):
     payType = ndb.KeyProperty(kind='PayementType', indexed = True, required = True)
 
     recordedBy = ndb.KeyProperty(kind='Person', indexed = True, required = True)
-    recordedOn = ndb.DateTimeProperty(auto_now_add=True, indexed = True, required = True)
+    recordedOn = ndb.DateTimeProperty(indexed = True, required = True)
  
 def sumAttribute(itemList, attribute):
     sum = 0
@@ -277,18 +280,22 @@ class AddExpense(webapp2.RequestHandler):
         
         payTypes = [t.render() for t in PayementType.query().fetch()]
         
+        today = datetime.date.today().strftime("%Y-%m-%d")
+        
         template_values = {
             'shopList': shops,
             'categoryList': cat,
             'personList': pers,
             'accountList': accounts,
-            'typeList': payTypes
+            'typeList': payTypes,
+            'today': today,
+            'payTypes': payTypes
         }
-        template = JINJA_ENVIRONMENT.get_template('add.html')
+        template = JINJA_ENVIRONMENT.get_template('addMobile.html')
         self.response.write(template.render(template_values))
         
     def post(self):
-        # expense = Expense(parent=expensebook_key(self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)))
+          
         user = users.get_current_user()
         if user:
             self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
@@ -296,39 +303,47 @@ class AddExpense(webapp2.RequestHandler):
         else:
             self.redirect(users.create_login_url(self.request.uri))
         
-        
         expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
         
         # logging.info("User: %s" % user.email())
         # logging.info("Expense Book Key: %s" % expensebook_key(expensebook_name))
         
         expense = Expense(parent=expensebook_key(expensebook_name))
-        # logging.info("Object: %s" % self.request.get('object'))
-        # logging.info("Price: %s" % float("%s.%s" % (self.request.get('price'), self.request.get('decimalPrice'))))
-        # logging.info("Shop: %s" % self.request.get('shop'))
-        # logging.info("Categories: %s" % self.request.get_all('categories'))
-        # logging.info("Accounts: %s" % self.request.get_all('account'))
-        # logging.info("Beneficiaries: %s" % self.request.get_all('paidFor'))
         
-        expense.object = self.request.get('object')
-        expense.price = float("%s.%s" % (self.request.get('price'), self.request.get('decimalPrice')))
+        # logging.info("Date: %s" % self.request.get('whenValue'))
+        expense.date = datetime.datetime.strptime(self.request.get('whenValue'), '%Y-%m-%d')   
+        
+        # logging.info("Object: %s" % self.request.get('whatValue'))
+        expense.object = self.request.get('whatValue')
+        
+        # logging.info("Price: %s" % self.request.get('priceValue'))
+        expense.price = float(self.request.get('priceValue'))
         expense.currency = Currency.query(Currency.code == "EUR").get().key
-        expense.shop = Shop.query(Shop.name == self.request.get('shop')).get().key
         
-        cats = self.request.get_all('categories')
-        catObjects = [ExpenseCategory.query(ExpenseCategory.name == c) for c in cats]
-        expense.categories = [cat.get().key for cat in catObjects]
-        expense.account = BankAccount.query(BankAccount.name == self.request.get('account')).get().key
+        # logging.info("Shop: %s" % self.request.get_all('shopValue'))
+        expense.shop = ndb.Key(urlsafe=self.request.get_all('shopValue')[0])
+        #expense.shop = Shop.query(Shop.name == self.request.get('shop')).get().key
         
-        benefs = self.request.get_all('paidFor')
-        benefObjects = [Person.query(ndb.AND(Person.firstName == b.split()[0], Person.lastName == b.split()[1])) for b in benefs]
-        benefKeys = [pers.get().key for pers in benefObjects]
-        expense.beneficiaries = benefKeys
+        # logging.info("Categories: %s" % self.request.get_all('catValues'))
+        cats = self.request.get_all('catValues')
+        expense.categories = [ndb.Key(urlsafe=cat) for cat in cats]
         
-        # logging.info("Account owner: %s" % BankAccount.query(BankAccount.name == self.request.get('account')).get().owner)
-        expense.buyers = BankAccount.query(BankAccount.name == self.request.get('account')).get().owner
+        # logging.info("Account: %s" % self.request.get_all('accountValue'))
+        account = ndb.Key(urlsafe=self.request.get_all('accountValue')[0])
+        expense.account = account
+        expense.buyers = account.get().owner
         
-        expense.payType = PayementType.query(PayementType.type == self.request.get('payType')).get().key
+        # logging.info("Benefs: %s" % self.request.get_all('benefsValue'))
+        benefs = self.request.get_all('benefsValue')
+        # benefObjects = [Person.query(ndb.AND(Person.firstName == b.split()[0], Person.lastName == b.split()[1])) for b in benefs]
+        # benefKeys = [pers.get().key for pers in benefObjects]
+        expense.beneficiaries = [ndb.Key(urlsafe=pers) for pers in benefs]
+        
+        expense.payType = ndb.Key(urlsafe=self.request.get('payTypeValue'))
+        #expense.payType = PayementType.query(PayementType.type == self.request.get('payType')).get().key
+        
+        expense.recordedOn = datetime.datetime.now()
+        logging.info(datetime.datetime.now())
         expense.recordedBy = Person.query(Person.email == user.email()).get().key
         
         # logging.info("Expense: %s" % expense.render())
@@ -336,6 +351,7 @@ class AddExpense(webapp2.RequestHandler):
         
         query_params = {'expensebook_name': expensebook_name}
         self.redirect('/?' + urllib.urlencode(query_params))
+       
         
 class FeedData(webapp2.RequestHandler):
 

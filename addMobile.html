@@ -4,19 +4,30 @@
 	<title>Add expense</title> 	
     <meta name="viewport" content="width=device-width, initial-scale=1"> 
     
+    <!--
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
     <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
     <script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+    -->
+    
+    <link rel="stylesheet" href="./resources/css/expenses.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    
+    
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="./resources/JS/expenses.js"></script>
        
+     
 </head> 
 
 <body>
-    <form action="" method="post">
+    <form action="/add" method="post" data-ajax="false">
     <!-- Start of first page -->
     <div data-role="page" id="what">
         <div data-role="header" data-id="foo1" data-position="fixed">
             <h1>Add Expense</h1>
-            <div data-role="navbar">
+            <div data-role="navbar" data-grid="d">
                 <ul>
                     <li><a href="#what" data-transition="slide">What</a></li>
                     <li><a href="#when" data-transition="slide">When</a></li>
@@ -28,7 +39,38 @@
         </div><!-- /header -->
         
         <div data-role="content">	
-            <p>What did you buy?</p>
+            <fieldset>
+                <label for="what">What did you buy?</label>
+                <input id="whatValue" data-type="search" name="whatValue" placeholder="Expense..." />
+            </fieldset>
+            <ul data-role="listview" data-filter="true" data-filter-reveal="true" data-input="#whatValue" data-inset="true">
+                <li><a class="autocomplete" href="#">Banane</a></li>
+                <li><a class="autocomplete" href="#">Charbon</a></li>
+                <li><a class="autocomplete" href="#">Courses</a></li>
+                <li><a class="autocomplete" href="#">Jardin</a></li>
+                <li><a class="autocomplete" href="#">Outils</a></li>
+                <li><a class="autocomplete" href="#">Restaurant</a></li>
+            </ul>
+            
+            <fieldset>
+                <label for="number-pattern">Price</label>
+                <input type="number" name="priceValue" step="0.01" min="0" id="priceValue" value="" />
+            </fieldset>
+            <!-- http://stackoverflow.com/questions/20432467/jquery-mobile-filtering-a-listview-of-checkboxes-causes-unstyled-checkboxes-to -->
+            <legend>Categories</legend>
+            <fieldset>
+              <input type="text" data-type="search" id="filterinput">
+            </fieldset>
+            <fieldset data-role="controlgroup" data-filter="true" data-input="#filterinput">
+                {% for cat in categoryList %}
+                    <label for="cat-{{cat.id}}">{{ cat.name }}
+                    <input type="checkbox" name="catValues" value="{{cat.id}}" id="cat-{{cat.id}}" />
+                    </label>
+                {% endfor %}
+              
+    
+            </fieldset>
+                 
         </div><!-- /content -->
 
         <div data-role="footer" data-id="footer1" data-position="fixed">
@@ -40,7 +82,7 @@
     <div data-role="page" id="when">
         <div data-role="header" data-id="foo1" data-position="fixed">
             <h1>Add Expense</h1>
-            <div data-role="navbar">
+            <div data-role="navbar" data-grid="d">
                 <ul>
                     <li><a href="#what" data-transition="slide">What</a></li>
                     <li><a href="#when" data-transition="slide">When</a></li>
@@ -51,8 +93,15 @@
             </div><!-- /navbar -->
         </div><!-- /header -->
         
-        <div data-role="content">	
-            <p>When did you buy it?</p>
+        <div data-role="content">
+            <label for="when">When did you buy it?</label>
+            <input type="date" name="whenValue" id="whenValue" value="{{today}}">
+            <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
+                <input type="radio" name="radio-am" id="radio-am" value="am" checked="checked">
+                <label for="radio-am">AM</label>
+                <input type="radio" name="radio-am" id="radio-pm" value="pm">
+                <label for="radio-pm">PM</label>
+            </fieldset>
             
         </div><!-- /content -->
 
@@ -67,7 +116,7 @@
 
         <div data-role="header" data-id="foo1" data-position="fixed">
             <h1>Add Expense</h1>
-            <div data-role="navbar" >
+            <div data-role="navbar" data-grid="d">
                 <ul>
                     <li><a href="#what" data-transition="slide">What</a></li>
                     <li><a href="#when" data-transition="slide">When</a></li>
@@ -79,20 +128,19 @@
         </div><!-- /header -->
 
         <div data-role="content">	
-            <fieldset data-role="controlgroup">
             <legend>Where did you buy it?</legend>
-                <input type="radio" name="radio-choice" id="radio-choice-1" value="choice-1" checked="checked" />
-                <label for="radio-choice-1">Delhaize</label>
-
-                <input type="radio" name="radio-choice" id="radio-choice-2" value="choice-2"  />
-                <label for="radio-choice-2">Match</label>
-
-                <input type="radio" name="radio-choice" id="radio-choice-3" value="choice-3"  />
-                <label for="radio-choice-3">Brico</label>
-
-                <input type="radio" name="radio-choice" id="radio-choice-4" value="choice-4"  />
-                <label for="radio-choice-4">Club</label>
+                
+            <fieldset>
+                <input type="text" data-type="search" id="filterShops">
             </fieldset>
+            <fieldset data-role="controlgroup" id="shopSelector" data-filter="true" data-input="#filterShops">
+                <!-- <input type="radio" name="shop" id="shop-1" value="1" checked="checked"/>
+                <label for="shop-1">test</label>  -->
+                {% for shop in shopList %}
+                    <input type="radio" name="shopValue" id="shop-{{shop.id}}" value="{{ shop.id }}" />
+                    <label for="shop-{{shop.id}}">{{ shop.name }}</label>         
+                {% endfor %}
+                </fieldset>
         </div><!-- /content -->
 
         <div data-role="footer" data-id="footer1" data-position="fixed">
@@ -105,7 +153,7 @@
 
         <div data-role="header" data-id="foo1" data-position="fixed">
             <h1>Add Expense</h1>
-            <div data-role="navbar" >
+            <div data-role="navbar" data-grid="d">
                 <ul>
                     <li><a href="#what" data-transition="slide">What</a></li>
                     <li><a href="#when" data-transition="slide">When</a></li>
@@ -117,13 +165,31 @@
         </div><!-- /header -->
 
         <div data-role="content">	
+            <label for="account" class="select">Which account was used?</label>
+            <select name="accountValue" id="accountValue" data-mini="true" data-inline="true">
+                {% for account in accountList %}
+                    <option value={{account.id}}>{{ account.name }}</option>
+                {% endfor %}                
+            </select>
+            
             <p>For who did you buy it?</p>
             <div data-role="fieldcontain">
-                <fieldset data-role="controlgroup">
-                   <input type="checkbox" name="checkbox-1" id="checkbox-1" class="custom" /><label for="checkbox-1">Arnaud</label>
-                   <input type="checkbox" name="checkbox-2" id="checkbox-2" class="custom" /><label for="checkbox-2">Stephanie</label>
+                <fieldset data-role="controlgroup" id="benefValue">
+                    {% for p in personList %}
+                        <input type="checkbox" name="benefsValue" id="person-{{p.id}}" class="custom" value="{{p.id}}" />
+                        <label for="person-{{p.id}}">{{ p.firstName }} {{ p.lastName }}</label>
+                    {% endfor %}
                 </fieldset>
             </div>
+            
+            <label for="payType" class="select">How did you pay?</label>
+            <select name="payTypeValue" id="payTypeValue" data-mini="true" data-inline="true">
+                {% for type in payTypes %}
+                    <option value={{type.id}}>{{ type.type }}</option>
+                {% endfor %}                
+            </select>
+        
+        
         </div><!-- /content -->
 
         <div data-role="footer" data-id="footer1" data-position="fixed">
@@ -136,7 +202,7 @@
 
         <div data-role="header" data-id="foo1" data-position="fixed">
             <h1>Add Expense</h1>
-            <div data-role="navbar" >
+            <div data-role="navbar" data-grid="d">
                 <ul>
                     <li><a href="#what" data-transition="slide">What</a></li>
                     <li><a href="#when" data-transition="slide">When</a></li>
@@ -148,7 +214,14 @@
         </div><!-- /header -->
 
         <div data-role="content">	
-            <p>Is this correct?</p>	
+            <p id="expenseSummary" class="centered">
+            On <span class="summary" id="dateDesc">date</span>,<BR/>
+            you bought a <span class="summary" id="objectDesc">object</span><BR/>
+            for <span class="summary" id="priceDesc">30.5</span> <span class=summary>&euro;</span><BR/>
+            at <span class="summary" id="shopDesc">Carrefour</span><BR/>
+            with <span class="summary" id="accountDesc">Arn Prive</span> bank account<BR/>
+            for <span class="summary" id="benefDesc">Arnaud</span>.<BR/><BR/>
+            <input type="submit" value="Confirm">
         </div><!-- /content -->
 
         <div data-role="footer" data-id="footer1" data-position="fixed">

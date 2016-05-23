@@ -50,7 +50,7 @@
 					<td>{{ expense.beneficiaries|join(', ',attribute="firstName") }} </td>
 					<td>{{ expense.account.name }}</td>
 					<td>{{ expense.recordedBy.firstName }}</td>
-					<td>{{ expense.recordedOn.strftime('%d-%m-%Y %H:%m') }}</td>
+					<td>{{ expense.recordedOn.strftime('%d-%m-%Y %H:%M') }}</td>
 				</tr>				
 			{% endfor %}
 			</tbody>
