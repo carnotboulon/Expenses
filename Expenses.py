@@ -355,8 +355,7 @@ class AddExpense(webapp2.RequestHandler):
 class RemoveExpense(webapp2.RequestHandler):
     def get(self):
         exp = ndb.Key(urlsafe=self.request.get('exp'))
-        logging.info(exp.get().render())
-        logging.info("Removing: %s" % exp.id())
+        logging.info("Removing: %s" % exp.get().object)
         exp.delete()
         
         
