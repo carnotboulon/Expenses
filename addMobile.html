@@ -4,12 +4,6 @@
 	<title>Add expense</title> 	
     <meta name="viewport" content="width=device-width, initial-scale=1"> 
     
-    <!--
-    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
-    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
-    <script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
-    -->
-    
     <link rel="stylesheet" href="./resources/css/expenses.css" />
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     
@@ -17,30 +11,36 @@
     <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <script src="./resources/JS/expenses.js"></script>
-       
-     
+        
 </head> 
 
 <body>
     <form action="/add" method="post" data-ajax="false">
+    
+    
+    
+    
     <!-- Start of first page -->
-    <div data-role="page" id="what">
-        <div data-role="header" data-id="foo1" data-position="fixed">
+    <div data-role="page" id="what">       
+        
+        <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Add Expense</h1>
+            <a href="/" data-icon="delete" class="ui-btn-right">Cancel</a>
             <div data-role="navbar" data-grid="d">
                 <ul>
-                    <li><a href="#what" data-transition="slide">What</a></li>
-                    <li><a href="#when" data-transition="slide">When</a></li>
-                    <li><a href="#where" data-transition="slide">Where</a></li>
-                    <li><a href="#who" data-transition="slide">Who</a></li>
-                    <li><a href="#save" data-transition="slide">Save</a></li>
+                    <li><a href="/add#what" class="ui-btn-active">What</a></li>
+                    <li><a href="/add#when">When</a></li>
+                    <li><a href="/add#where">Where</a></li>
+                    <li><a href="/add#who">Who</a></li>
+                    <li><a href="/add#save">Save</a></li>
                 </ul>
             </div><!-- /navbar -->
         </div><!-- /header -->
         
+        
         <div data-role="content">	
             <fieldset>
-                <label for="what">What did you buy?</label>
+                <label for="whatValue">What did you buy?</label>
                 <input id="whatValue" data-type="search" name="whatValue" placeholder="Expense..." />
             </fieldset>
             <ul data-role="listview" data-filter="true" data-filter-reveal="true" data-input="#whatValue" data-inset="true">
@@ -72,23 +72,26 @@
             </fieldset>
                  
         </div><!-- /content -->
-
-        <div data-role="footer" data-id="footer1" data-position="fixed">
+        
+        <div data-role="footer" data-position="fixed" data-theme="a">
             <h4>B&amp;P</h4>
         </div><!-- /footer -->
+        
     </div><!-- /page -->
     
     <!-- Start of first page -->
-    <div data-role="page" id="when">
-        <div data-role="header" data-id="foo1" data-position="fixed">
+    <div data-role="page" id="when" data-add-back-btn="true">
+        
+        <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Add Expense</h1>
+            <a href="/" data-icon="delete" class="ui-btn-right">Cancel</a>
             <div data-role="navbar" data-grid="d">
                 <ul>
-                    <li><a href="#what" data-transition="slide">What</a></li>
-                    <li><a href="#when" data-transition="slide">When</a></li>
-                    <li><a href="#where" data-transition="slide">Where</a></li>
-                    <li><a href="#who" data-transition="slide">Who</a></li>
-                    <li><a href="#save" data-transition="slide">Save</a></li>
+                    <li><a href="#what">What</a></li>
+                    <li><a href="#when" class="ui-btn-active">When</a></li>
+                    <li><a href="#where">Where</a></li>
+                    <li><a href="#who">Who</a></li>
+                    <li><a href="#save">Save</a></li>
                 </ul>
             </div><!-- /navbar -->
         </div><!-- /header -->
@@ -104,29 +107,31 @@
             </fieldset>
             
         </div><!-- /content -->
-
-        <div data-role="footer" data-id="footer1" data-position="fixed">
+        
+        <div data-role="footer" data-position="fixed" data-theme="a">
             <h4>B&amp;P</h4>
         </div><!-- /footer -->
+        
     </div><!-- /page -->
 
 
     <!-- Start of second page -->
-    <div data-role="page" id="where">
-
-        <div data-role="header" data-id="foo1" data-position="fixed">
+    <div data-role="page" id="where" >
+        
+        <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Add Expense</h1>
+            <a href="/" data-icon="delete" class="ui-btn-right">Cancel</a>
             <div data-role="navbar" data-grid="d">
                 <ul>
-                    <li><a href="#what" data-transition="slide">What</a></li>
-                    <li><a href="#when" data-transition="slide">When</a></li>
-                    <li><a href="#where" data-transition="slide">Where</a></li>
-                    <li><a href="#who" data-transition="slide">Who</a></li>
-                    <li><a href="#save" data-transition="slide">Save</a></li>
+                    <li><a href="#what">What</a></li>
+                    <li><a href="#when">When</a></li>
+                    <li><a href="#where"  class="ui-btn-active">Where</a></li>
+                    <li><a href="#who">Who</a></li>
+                    <li><a href="#save">Save</a></li>
                 </ul>
             </div><!-- /navbar -->
         </div><!-- /header -->
-
+        
         <div data-role="content">	
             <legend>Where did you buy it?</legend>
                 
@@ -142,28 +147,30 @@
                 {% endfor %}
                 </fieldset>
         </div><!-- /content -->
-
-        <div data-role="footer" data-id="footer1" data-position="fixed">
+        
+        <div data-role="footer" data-position="fixed" data-theme="a">
             <h4>B&amp;P</h4>
         </div><!-- /footer -->
+        
     </div><!-- /page -->
     
     <!-- Start of second page -->
     <div data-role="page" id="who">
-
-        <div data-role="header" data-id="foo1" data-position="fixed">
+        
+        <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Add Expense</h1>
+            <a href="/" data-icon="delete" class="ui-btn-right">Cancel</a>
             <div data-role="navbar" data-grid="d">
                 <ul>
-                    <li><a href="#what" data-transition="slide">What</a></li>
-                    <li><a href="#when" data-transition="slide">When</a></li>
-                    <li><a href="#where" data-transition="slide">Where</a></li>
-                    <li><a href="#who" data-transition="slide">Who</a></li>
-                    <li><a href="#save" data-transition="slide">Save</a></li>
+                    <li><a href="#what">What</a></li>
+                    <li><a href="#when">When</a></li>
+                    <li><a href="#where">Where</a></li>
+                    <li><a href="#who" class="ui-btn-active">Who</a></li>
+                    <li><a href="#save">Save</a></li>
                 </ul>
             </div><!-- /navbar -->
-        </div><!-- /header -->
-
+        </div><!-- /header -->       
+        
         <div data-role="content">	
             <label for="account" class="select">Which account was used?</label>
             <select name="accountValue" id="accountValue" data-mini="true" data-inline="true">
@@ -188,31 +195,31 @@
                     <option value={{type.id}}>{{ type.type }}</option>
                 {% endfor %}                
             </select>
-        
-        
         </div><!-- /content -->
-
-        <div data-role="footer" data-id="footer1" data-position="fixed">
+        
+        <div data-role="footer" data-position="fixed" data-theme="a">
             <h4>B&amp;P</h4>
         </div><!-- /footer -->
+        
     </div><!-- /page -->
     
     <!-- Start of second page -->
     <div data-role="page" id="save">
-
-        <div data-role="header" data-id="foo1" data-position="fixed">
+        
+        <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Add Expense</h1>
+            <a href="/" data-icon="delete" class="ui-btn-right">Cancel</a>
             <div data-role="navbar" data-grid="d">
                 <ul>
-                    <li><a href="#what" data-transition="slide">What</a></li>
-                    <li><a href="#when" data-transition="slide">When</a></li>
-                    <li><a href="#where" data-transition="slide">Where</a></li>
-                    <li><a href="#who" data-transition="slide">Who</a></li>
-                    <li><a href="#save" data-transition="slide">Save</a></li>
+                    <li><a href="#what">What</a></li>
+                    <li><a href="#when">When</a></li>
+                    <li><a href="#where">Where</a></li>
+                    <li><a href="#who">Who</a></li>
+                    <li><a href="#save" class="ui-btn-active">Save</a></li>
                 </ul>
             </div><!-- /navbar -->
         </div><!-- /header -->
-
+        
         <div data-role="content">	
             <p id="expenseSummary" class="centered">
             On <span class="summary" id="dateDesc">date</span>,<BR/>
@@ -222,12 +229,15 @@
             with <span class="summary" id="accountDesc">Arn Prive</span> bank account<BR/>
             for <span class="summary" id="benefDesc">Arnaud</span>.<BR/><BR/>
             <input type="submit" value="Confirm">
-        </div><!-- /content -->
-
-        <div data-role="footer" data-id="footer1" data-position="fixed">
+        </div><!-- /content -->   
+    
+        <div data-role="footer" data-position="fixed" data-theme="a">
             <h4>B&amp;P</h4>
         </div><!-- /footer -->
+    
     </div><!-- /page -->
+    
+   
     
     </form>
 </body>

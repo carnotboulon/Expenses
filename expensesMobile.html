@@ -1,0 +1,87 @@
+{<!DOCTYPE html> 
+<html> 
+<head> 
+	<title>Add expense</title> 	
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    
+    <link rel="stylesheet" href="./resources/css/expenses.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    
+    
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    
+    
+</head> 
+
+<body>
+<!-- Start of first page -->
+    
+    
+    <div data-role="page">
+        
+        <div data-role="header" data-position="fixed" data-theme="a">
+            <h1>Expenses</h1>
+            <div data-role="navbar" >
+                <ul>
+                    <li><a href="/" class="ui-btn-active">Summary</a></li>
+                    <li><a href="/balance">Balance</a></li>
+                    <li><a href="/add">Add</a></li>
+                </ul>
+            </div><!-- /navbar -->
+        </div><!-- /header -->
+        
+        <div data-role="content">	
+            <table data-role="table" id="table-column-toggle" data-mode="columntoggle" class="ui-responsive table-stripe ui-body-d ui-shadow">
+            <thead>
+                <tr>
+                    <th data-priority="3">Date</th>
+                    <th data-priority="5">Shop</th>
+                    <th data-priority="5">Category</th>
+                    <th>What?</th>
+                    <th data-priority="1">Price</th>
+                    <th data-priority="2">Bought by?</th>
+                    <th data-priority="3">Bought for?</th>
+                    <th data-priority="4">Paid with?</th>
+                    <th data-priority="6">Recorded By</th>
+                    <th data-priority="6">Recorded On</th>
+                </tr>
+            </thead>
+                       
+            <tbody>
+            {% for expense in expenses %}
+                <tr id="{{ expense.id }}">
+                    <td>{{ expense.date.strftime('%d %b %y') }}</td>
+                    <td>{{ expense.shop.name }}</td>
+                    <td>{{ expense.categories|join(', ',attribute="name") }}</td>
+                    <td>{{ expense.object }}</td>
+                    <td>{{ expense.price }}</td>
+                    <td>{{ expense.buyers|join(', ',attribute="firstName") }} </td>
+                    <td>{{ expense.beneficiaries|join(', ',attribute="firstName") }} </td>
+                    <td>{{ expense.account.name }}</td>
+                    <td>{{ expense.recordedBy.firstName }}</td>
+                    <td>{{ expense.recordedOn.strftime('%d %b %y %H:%M') }}</td>
+                </tr>
+                 
+            {% endfor %}
+            </tbody>
+            </table>
+        </div>
+        
+        <div data-role="footer" data-position="fixed" data-theme="a">
+            <h4>B&amp;P</h4>
+        </div><!-- /footer -->
+        
+</div><!-- /page -->
+
+<script>
+        $('table tr').dblclick(function(){
+            console.log("Remove Row");
+            console.log($(this).attr("id"));
+            $(this).remove();
+            $.ajax("/remove?exp="+$(this).attr("id"));
+        });
+</script>      
+    
+</body>
+</html>

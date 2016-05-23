@@ -38,6 +38,9 @@ $(function() {
             $(this).parent().parent().children().addClass("ui-screen-hidden"); //hide the autocomplete list.
         }
   );
-});
+  
+  
+  
+});//end of master function.
 
 

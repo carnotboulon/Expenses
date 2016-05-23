@@ -228,9 +228,9 @@ class ExpensesPage(webapp2.RequestHandler):
             'accountList': "",
             'typeList':""
         }
-        template = JINJA_ENVIRONMENT.get_template('expenses.html')
+        template = JINJA_ENVIRONMENT.get_template('expensesMobile.html')
         self.response.write(template.render(template_values))
-
+        
 class BalancePage(webapp2.RequestHandler):
 
     def get(self):
@@ -247,16 +247,16 @@ class BalancePage(webapp2.RequestHandler):
         # for exp in stephanieExpenses:
             # logging.info("%s: %s buyers, %s benefs" % (exp.object, exp.nb_buyers, exp.nb_beneficiaries))
         
-        # template_values = {
-            # 'expenses': expenseList,
-            # 'shopList': "",
-            # 'categoryList': "",
-            # 'personList': "",
-            # 'accountList': "",
-            # 'typeList':""
-        # }
-        # template = JINJA_ENVIRONMENT.get_template('expenses.html')
-        # self.response.write(template.render(template_values))
+        template_values = {
+            'expenses': "",
+            'shopList': "",
+            'categoryList': "",
+            'personList': "",
+            'accountList': "",
+            'typeList':""
+        }
+        template = JINJA_ENVIRONMENT.get_template('balanceMobile.html')
+        self.response.write(template.render(template_values))
         
 class AddExpense(webapp2.RequestHandler):
     def get(self):
@@ -351,7 +351,14 @@ class AddExpense(webapp2.RequestHandler):
         
         query_params = {'expensebook_name': expensebook_name}
         self.redirect('/?' + urllib.urlencode(query_params))
-       
+
+class RemoveExpense(webapp2.RequestHandler):
+    def get(self):
+        exp = ndb.Key(urlsafe=self.request.get('exp'))
+        logging.info(exp.get().render())
+        logging.info("Removing: %s" % exp.id())
+        exp.delete()
+        
         
 class FeedData(webapp2.RequestHandler):
 
@@ -389,5 +396,7 @@ app = webapp2.WSGIApplication([
     # ('/feed', FeedData),
     ('/add', AddExpense),
     ('/balance', BalancePage),
+    ('/remove', RemoveExpense),
+    
     
 ], debug=True)
