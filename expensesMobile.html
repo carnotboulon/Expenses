@@ -10,7 +10,7 @@
     
     <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-    
+    <script src="./resources/JS/summaryExpenses.js"></script>
     
 </head> 
 
@@ -31,7 +31,24 @@
             </div><!-- /navbar -->
         </div><!-- /header -->
         
-        <div data-role="content">	
+        <div data-role="content">
+        
+            <div data-role="popup" id="popupDialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
+                <div data-role="header" data-theme="a">
+                <h1>Delete Page?</h1>
+                </div>
+                <div role="main" style="text-align:center" class="ui-content">
+                    <h3 class="ui-title">Are you sure you want to delete</h3>
+                    <h3 id="delExpense"></h3>
+                    
+                    <p>This action cannot be undone.</p>
+                    <a href="#" id="cancelBtn" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b" data-rel="back">Cancel</a>
+                    <a href="/" id="deleteBtn" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b" data-rel="back" data-transition="flow">Delete</a>
+                </div>
+
+            </div>
+        
+        
             <table data-role="table" id="table-column-toggle" data-mode="columntoggle" class="ui-responsive table-stripe ui-body-d ui-shadow">
             <thead>
                 <tr>
@@ -51,16 +68,16 @@
             <tbody>
             {% for expense in expenses %}
                 <tr id="{{ expense.id }}">
-                    <td>{{ expense.date.strftime('%d %b %y') }}</td>
-                    <td>{{ expense.shop.name }}</td>
-                    <td>{{ expense.categories|join(', ',attribute="name") }}</td>
-                    <td>{{ expense.object }}</td>
-                    <td>{{ expense.price }}</td>
-                    <td>{{ expense.buyers|join(', ',attribute="firstName") }} </td>
-                    <td>{{ expense.beneficiaries|join(', ',attribute="firstName") }} </td>
-                    <td>{{ expense.account.name }}</td>
-                    <td>{{ expense.recordedBy.firstName }}</td>
-                    <td>{{ expense.recordedOn.strftime('%d %b %y %H:%M') }}</td>
+                    <td class="date">{{ expense.date.strftime('%d %b %y') }}</td>
+                    <td class="shop">{{ expense.shop.name }}</td>
+                    <td class="cat">{{ expense.categories|join(', ',attribute="name") }}</td>
+                    <td class="object">{{ expense.object }}</td>
+                    <td class="price">{{ expense.price }}</td>
+                    <td class="buyers">{{ expense.buyers|join(', ',attribute="firstName") }} </td>
+                    <td class="benefs">{{ expense.beneficiaries|join(', ',attribute="firstName") }} </td>
+                    <td class="account">{{ expense.account.name }}</td>
+                    <td class="recordedBy">{{ expense.recordedBy.firstName }}</td>
+                    <td class="recordedOn">{{ expense.recordedOn.strftime('%d %b %y %H:%M') }}</td>
                 </tr>
                  
             {% endfor %}
@@ -72,16 +89,7 @@
             <h4>B&amp;P</h4>
         </div><!-- /footer -->
         
-</div><!-- /page -->
-
-<script>
-        $('table tr').dblclick(function(){
-            console.log("Remove Row");
-            console.log($(this).attr("id"));
-            $(this).remove();
-            $.ajax("/remove?exp="+$(this).attr("id"));
-        });
-</script>      
+</div><!-- /page -->    
     
 </body>
 </html>

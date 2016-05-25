@@ -8,3 +8,8 @@
     font-weight: bold;
     color: #38c;
 }
+
+#table-column-toggle
+{
+    cursor:pointer;
+}   
