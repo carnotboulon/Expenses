@@ -6,27 +6,22 @@
     
     <link rel="stylesheet" href="./resources/css/expenses.css" />
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
-    
-    
+     
     <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <script src="./resources/JS/addExpenses.js"></script>
-        
 </head> 
 
 <body>
-    <form action="/add" method="post" data-ajax="false">
-    
-    
-    
-    
+<form action="/add" method="post" data-ajax="false">
+
     <!-- Start of first page -->
     <div data-role="page" id="what">       
         
         <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Add Expense</h1>
             <a href="/" data-icon="delete" class="ui-btn-right">Cancel</a>
-            <div data-role="navbar" data-grid="d">
+            <div data-role="navbar" data-position="fixed" data-grid="d">
                 <ul>
                     <li><a href="#what" class="ui-btn-active">What</a></li>
                     <li><a href="#when">When</a></li>
@@ -44,12 +39,9 @@
                 <input id="whatValue" data-type="search" name="whatValue" placeholder="Expense..." />
             </fieldset>
             <ul data-role="listview" data-filter="true" data-filter-reveal="true" data-input="#whatValue" data-inset="true">
-                <li><a class="autocomplete" href="#">Banane</a></li>
-                <li><a class="autocomplete" href="#">Charbon</a></li>
-                <li><a class="autocomplete" href="#">Courses</a></li>
-                <li><a class="autocomplete" href="#">Jardin</a></li>
-                <li><a class="autocomplete" href="#">Outils</a></li>
-                <li><a class="autocomplete" href="#">Restaurant</a></li>
+                {% for obj in expList %}
+                    <li><a class="autocomplete" href="#">{{ obj }}</a></li>
+                {% endfor %}
             </ul>
             
             <fieldset>
@@ -61,11 +53,11 @@
             <fieldset>
               <input type="text" data-type="search" id="filterinput">
             </fieldset>
-            <fieldset data-role="controlgroup" data-filter="true" data-input="#filterinput">
+            <fieldset data-role="controlgroup" data-filter="true" data-filter-reveal="true" data-input="#filterinput">
                 {% for cat in categoryList %}
-                    <label for="cat-{{cat.id}}">{{ cat.name }}
+                    <label for="cat-{{cat.id}}">{{ cat.name }}</label>
                     <input type="checkbox" name="catValues" value="{{cat.id}}" id="cat-{{cat.id}}" />
-                    </label>
+                    
                 {% endfor %}
               
     
@@ -85,7 +77,7 @@
         <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Add Expense</h1>
             <a href="/" data-icon="delete" class="ui-btn-right">Cancel</a>
-            <div data-role="navbar" data-grid="d">
+            <div data-role="navbar" data-position="fixed" data-grid="d">
                 <ul>
                     <li><a href="#what">What</a></li>
                     <li><a href="#when" class="ui-btn-active">When</a></li>
@@ -99,13 +91,15 @@
         <div data-role="content">
             <label for="when">When did you buy it?</label>
             <input type="date" name="whenValue" id="whenValue" value="{{today}}">
+            <!-- 
             <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
                 <input type="radio" name="radio-am" id="radio-am" value="am" checked="checked">
                 <label for="radio-am">AM</label>
                 <input type="radio" name="radio-am" id="radio-pm" value="pm">
                 <label for="radio-pm">PM</label>
             </fieldset>
-            
+             -->
+             
         </div><!-- /content -->
         
         <div data-role="footer" data-position="fixed" data-theme="a">
@@ -121,7 +115,7 @@
         <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Add Expense</h1>
             <a href="/" data-icon="delete" class="ui-btn-right">Cancel</a>
-            <div data-role="navbar" data-grid="d">
+            <div data-role="navbar" data-position="fixed" data-grid="d">
                 <ul>
                     <li><a href="#what">What</a></li>
                     <li><a href="#when">When</a></li>
@@ -138,7 +132,7 @@
             <fieldset>
                 <input type="text" data-type="search" id="filterShops">
             </fieldset>
-            <fieldset data-role="controlgroup" id="shopSelector" data-filter="true" data-input="#filterShops">
+            <fieldset data-role="controlgroup" id="shopSelector" data-filter="true" data-filter-reveal="true" data-input="#filterShops">
                 <!-- <input type="radio" name="shop" id="shop-1" value="1" checked="checked"/>
                 <label for="shop-1">test</label>  -->
                 {% for shop in shopList %}
@@ -160,7 +154,7 @@
         <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Add Expense</h1>
             <a href="/" data-icon="delete" class="ui-btn-right">Cancel</a>
-            <div data-role="navbar" data-grid="d">
+            <div data-role="navbar" data-position="fixed" data-grid="d">
                 <ul>
                     <li><a href="#what">What</a></li>
                     <li><a href="#when">When</a></li>
@@ -209,7 +203,7 @@
         <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Add Expense</h1>
             <a href="/" data-icon="delete" class="ui-btn-right">Cancel</a>
-            <div data-role="navbar" data-grid="d">
+            <div data-role="navbar" data-position="fixed" data-grid="d">
                 <ul>
                     <li><a href="#what">What</a></li>
                     <li><a href="#when">When</a></li>
@@ -235,11 +229,8 @@
             <h4>B&amp;P</h4>
         </div><!-- /footer -->
     
-    </div><!-- /page -->
-    
-   
-    
-    </form>
+    </div><!-- /page --> 
+</form>
 </body>
 </html>
 

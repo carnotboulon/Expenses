@@ -9,7 +9,7 @@ $(function() {
             //Sets span values to input values for the different fields.
             $("#dateDesc").html($("#whenValue").val());
             $("#objectDesc").html($("#whatValue").val());
-            $("#priceDesc").html($("#price").val());
+            $("#priceDesc").html($("#priceValue").val());
             $("#shopDesc").html($("#shopSelector label[for='shop-"+$('#shopSelector :checked').val()+"']").text());
             $("#accountDesc").html($("select[name='account'] :selected").text());
             

@@ -1,4 +1,4 @@
-{<!DOCTYPE html> 
+<!DOCTYPE html> 
 <html> 
 <head> 
 	<title>Add expense</title> 	
@@ -7,32 +7,38 @@
     <link rel="stylesheet" href="./resources/css/expenses.css" />
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     
-    
     <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-    
-
 </head> 
 
 <body>
 <!-- Start of first page -->
-    
-    
+       
     <div data-role="page" id="summary" >
         
         <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Expenses</h1>
-            <div data-role="navbar">
+            <div data-role="navbar" data-position="fixed">
                 <ul>
-                    <li><a href="/">Summary</a></li>
-                    <li><a href="/balance" class="ui-btn-active">Balance</a></li>
-                    <li><a href="/add">Add</a></li>
+                    <li><a href="/" rel="external">Summary</a></li>
+                    <li><a href="/balance" rel="external" class="ui-btn-active">Balance</a></li>
+                    <li><a href="/add" rel="external">Add</a></li>
                 </ul>
             </div><!-- /navbar -->
         </div><!-- /header -->
         
         <div data-role="content">	
-            Arnaud doit 56EUR a Steph
+            
+            <ul data-role="listview" data-inset="true">
+                {% for action in actions %}
+                <li><a href="#">
+                    <img src="./resources/Pictures/profile.jpg" />
+                        <h3>{{ action.person }}</h3>
+                        <p>{{ action.action }}</p>
+                </a></li> 
+                {% endfor %}
+            </ul>
+            
         </div>
 
         <div data-role="footer" data-position="fixed" data-theme="a">
