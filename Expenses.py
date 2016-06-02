@@ -285,7 +285,10 @@ class AddExpense(webapp2.RequestHandler):
         
         today = datetime.date.today().strftime("%Y-%m-%d")
         
+        user = users.get_current_user()
+        
         template_values = {
+            'user': user.email().lower(),
             'expList': objects,
             'shopList': shops,
             'categoryList': cat,
@@ -348,7 +351,10 @@ class AddExpense(webapp2.RequestHandler):
         
         expense.recordedOn = datetime.datetime.now()
         logging.info(datetime.datetime.now())
-        expense.recordedBy = Person.query(Person.email == user.email()).get().key
+        
+        logging.info("User: %s", user.email())
+        expense.recordedBy = Person.query(Person.email == user.email().lower()).get().key
+        
         
         # logging.info("Expense: %s" % expense.render())
         expense.put()
