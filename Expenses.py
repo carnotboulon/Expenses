@@ -172,6 +172,13 @@ def computeBalance(expensebook_name):
     persDict = {}
     for p in pers:
         persDict[p.key.id()] = {"exp": 0., "benef": 0.}
+        
+        # Initialise la valeur pour Arn au bilan du 03 JUN 2016.
+        # Derniere depense = Delhaize 2 JUN 16, 48.85 EUR.
+        if p.email == "arnaudboland@gmail.com":
+            persDict[p.key.id()]["benef"] = 348.73
+        if p.email == "stephanie.thys@gmail.com":
+            persDict[p.key.id()]["exp"] = 348.73
     
     # logging.info(persDict)
     expenses = Expense.query(ancestor = expensebook_key(expensebook_name))
