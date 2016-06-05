@@ -6,6 +6,7 @@ import os, datetime, webapp2, logging, urllib
 import jinja2
 import webapp2
 
+authorized_users = ["arnaudboland@gmail.com", "stephanie.thys@gmail.com"]
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -204,7 +205,7 @@ class ExpensesPage(webapp2.RequestHandler):
         user = users.get_current_user()
         if not user:
             self.redirect(users.create_login_url(self.request.uri))
-        
+   
         expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
         expenses_query = Expense.query(ancestor=expensebook_key(expensebook_name)).order(-Expense.date)
         expenses = expenses_query.fetch()
@@ -226,11 +227,19 @@ class ExpensesPage(webapp2.RequestHandler):
             'accountList': "",
             'typeList':""
         }
-        template = JINJA_ENVIRONMENT.get_template('expensesMobile.html')
-        self.response.write(template.render(template_values))
+        if user.email().lower() in authorized_users:
+            template = JINJA_ENVIRONMENT.get_template('expensesMobile.html')
+            self.response.write(template.render(template_values))
+        else:
+            template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
+            self.response.write(template.render({"email":user.email().lower()}))
         
 class BalancePage(webapp2.RequestHandler):
     def get(self):
+        user = users.get_current_user()
+        if not user:
+            self.redirect(users.create_login_url(self.request.uri))
+
         expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
         
         comptes = computeBalance(expensebook_name)
@@ -251,15 +260,22 @@ class BalancePage(webapp2.RequestHandler):
             logging.info(action)
             actions.append({"person":"%s %s"%(Person.get_by_id(k).firstName, Person.get_by_id(k).lastName), "action":action})
             
-        
-        template_values = {
-            'actions': actions
-        }
-        template = JINJA_ENVIRONMENT.get_template('balanceMobile.html')
-        self.response.write(template.render(template_values))
+        if user.email().lower() in authorized_users:
+            template_values = {
+                'actions': actions
+            }
+            template = JINJA_ENVIRONMENT.get_template('balanceMobile.html')
+            self.response.write(template.render(template_values))
+        else:
+            template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
+            self.response.write(template.render({"email":user.email().lower()}))
         
 class AddExpense(webapp2.RequestHandler):
     def get(self):
+        user = users.get_current_user()
+        if not user:
+            self.redirect(users.create_login_url(self.request.uri))       
+        
         # Get data.
         expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
         
@@ -298,16 +314,16 @@ class AddExpense(webapp2.RequestHandler):
             'today': today,
             'payTypes': payTypes
         }
-        template = JINJA_ENVIRONMENT.get_template('addMobile.html')
-        self.response.write(template.render(template_values))
-        
-    def post(self):
-          
-        user = users.get_current_user()
-        if user:
-            self.response.headers['Content-Type'] = 'text/html; charset=utf-8'
-            self.response.write('Hello, ' + user.nickname())
+        if user.email().lower() in authorized_users:
+            template = JINJA_ENVIRONMENT.get_template('addMobile.html')
+            self.response.write(template.render(template_values))
         else:
+            template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
+            self.response.write(template.render({"email":user.email().lower()}))
+           
+    def post(self): 
+        user = users.get_current_user()
+        if not user:
             self.redirect(users.create_login_url(self.request.uri))
         
         expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
@@ -355,12 +371,15 @@ class AddExpense(webapp2.RequestHandler):
         logging.info("User: %s", user.email())
         expense.recordedBy = Person.query(Person.email == user.email().lower()).get().key
         
-        
-        # logging.info("Expense: %s" % expense.render())
-        expense.put()
-        
-        query_params = {'expensebook_name': expensebook_name}
-        self.redirect('/?' + urllib.urlencode(query_params))
+        if user.email().lower() not in authorized_users:
+            # logging.info("Expense: %s" % expense.render())
+            expense.put()
+            
+            query_params = {'expensebook_name': expensebook_name}
+            self.redirect('/?' + urllib.urlencode(query_params))
+        else:
+            template = JINJA_ENVIRONMENT.get_template('authorizedMobile.html')
+            self.response.write(template.render({"email":user.email().lower()}))
 
 class RemoveExpense(webapp2.RequestHandler):
     def get(self):
@@ -372,10 +391,10 @@ class FeedData(webapp2.RequestHandler):
     def get(self):
         self.response.write("Bonjour c'est dans la boite.")
         
-        # steph = ndb.Key(urlsafe="aghkZXZ-Tm9uZXITCxIGUGVyc29uGICAgICAgKQIDA").get()
-        # arn = ndb.Key(urlsafe="aghkZXZ-Tm9uZXITCxIGUGVyc29uGICAgICAgIQKDA").get()
+        # arn = ndb.Key(urlsafe="agxzfmJhbmRwbW9uZXlyEwsSBlBlcnNvbhiAgICAnZSHCgw").get()
+        # steph = ndb.Key(urlsafe="agxzfmJhbmRwbW9uZXlyEwsSBlBlcnNvbhiAgICA692ICgw").get()
         
-        # BankAccount(owner = [arn.key], name = "Arn Visa", number = "123-456789-11", bank = "Belfius").put()
+        # BankAccount(owner = [arn.key,steph.key], name = "Commun Courant", number = "123-456789-11", bank = "Belfius").put()
         # BankAccount(owner = [arn.key], name = "Arn MasterCard", number = "123-456789-11", bank = "Belfius").put()
         
         # Shop(name = "Brico").put()
@@ -388,25 +407,26 @@ class FeedData(webapp2.RequestHandler):
         # Shop(name = "Boulangerie").put()
         # Shop(name = "Colruyt").put()
         # Shop(name = "Spar").put()
-        shops = [s.render() for s in Shop.query().order(Shop.name)]
-        logging.info("Shops: %s" % shops)
+        # shops = [s.render() for s in Shop.query().order(Shop.name)]
+        # logging.info("Shops: %s" % shops)
         
-        cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.name)]
-        for c in cat:
-            logging.info("%s" % c)
+        # cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.name)]
+        # for c in cat:
+            # logging.info("%s" % c)
         
-        pers = [p.render() for p in Person.query().order(Person.firstName)]
-        for p in pers:
-            logging.info("%s %s %s %s" % (p["firstName"], p["lastName"], p["email"], p["surname"]))
+        # pers = [p.render() for p in Person.query().order(Person.firstName)]
+        # for p in pers:
+            # logging.info("%s %s %s %s" % (p["firstName"], p["lastName"], p["email"], p["surname"]))
         
-        accounts = [a.render() for a in BankAccount.query().order(BankAccount.name)]
-        for a in accounts:
-            logging.info("%s %s %s" % (a["number"], a["bank"], a["owner"][0]["id"]))
+        # accounts = [a.render() for a in BankAccount.query().order(BankAccount.name)]
+        # for a in accounts:
+            # logging.info("%s %s %s" % (a["number"], a["bank"], a["owner"][0]["id"]))
+        
         
         
 app = webapp2.WSGIApplication([
     ('/', ExpensesPage),
-    ('/feed', FeedData),
+    # ('/feed', FeedData),
     ('/add', AddExpense),
     ('/balance', BalancePage),
     ('/remove', RemoveExpense),
