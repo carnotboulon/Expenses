@@ -175,7 +175,13 @@
             
             <p>For who did you buy it?</p>
             <div data-role="fieldcontain">
+                           
+                <fieldset data-role="controlgroup">
+                    <label><input type="checkbox" data-mini="true" id="menageSelect" name="menageSelect" data-theme="c">Ménage</label>
+                </fieldset>
+                <BR>
                 <fieldset data-role="controlgroup" id="benefValue">
+                    
                     {% for p in personList %}
                         <input type="checkbox" name="benefsValue" id="person-{{p.id}}" class="custom" value="{{p.id}}" />
                         <label for="person-{{p.id}}">{{ p.firstName }} {{ p.lastName }}</label>

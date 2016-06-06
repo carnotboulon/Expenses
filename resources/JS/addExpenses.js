@@ -40,8 +40,14 @@ $(function() {
         }
   );
   
+  //Button to check all persons in the Person tab.
   
+    $('#menageSelect').change(function(){
+        console.log($(this).is("checked"));
+        $("input:checkbox[name='benefsValue']").prop('checked',$(this).prop("checked"));
+        $("input:checkbox[name='benefsValue']").checkboxradio('refresh');        
+    });
   
 });//end of master function.
-
+//$("input:checkbox").prop('checked', $(this).prop("checked"));
 

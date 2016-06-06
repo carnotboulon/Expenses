@@ -173,12 +173,12 @@ def computeBalance(expensebook_name):
     for p in pers:
         persDict[p.key.id()] = {"exp": 0., "benef": 0.}
         
-        # Initialise la valeur pour Arn au bilan du 03 JUN 2016.
-        # Derniere depense = Delhaize 2 JUN 16, 48.85 EUR.
+        # Initialise la valeur pour Arn au bilan du 06 JUN 2016.
+        # Derniere depense = Bic pour faire-part 06 JUN 16, 5.77 EUR.
         if p.email == "arnaudboland@gmail.com":
-            persDict[p.key.id()]["benef"] = 348.73
+            persDict[p.key.id()]["benef"] = 341.50 + 88.09
         if p.email == "stephanie.thys@gmail.com":
-            persDict[p.key.id()]["exp"] = 348.73
+            persDict[p.key.id()]["exp"] = 341.50 + 88.09
     
     # logging.info(persDict)
     expenses = Expense.query(ancestor = expensebook_key(expensebook_name))
@@ -378,14 +378,14 @@ class AddExpense(webapp2.RequestHandler):
         logging.info("User: %s", user.email())
         expense.recordedBy = Person.query(Person.email == user.email().lower()).get().key
         
-        if user.email().lower() not in authorized_users:
+        if user.email().lower() in authorized_users:
             # logging.info("Expense: %s" % expense.render())
             expense.put()
             
             query_params = {'expensebook_name': expensebook_name}
             self.redirect('/?' + urllib.urlencode(query_params))
         else:
-            template = JINJA_ENVIRONMENT.get_template('authorizedMobile.html')
+            template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
             self.response.write(template.render({"email":user.email().lower()}))
 
 class RemoveExpense(webapp2.RequestHandler):

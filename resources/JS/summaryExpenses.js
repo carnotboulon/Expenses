@@ -4,7 +4,7 @@ $(function() {
         console.log($(this).attr("id"));
         var that = $(this);
         //Updating popup text and link.
-        $( "#popupdialog #delExpense").html($(this).children("td.object").html()+ "?");
+        $( "#popupDialog #delExpense").html($(this).children("td.object").html()+ "?");
         $( "#deleteBtn" ).unbind().click(
             function ()
             {
@@ -21,7 +21,7 @@ $(function() {
         console.log($(this).attr("id"));
         var that = $(this);
         //Updating popup text and link.
-        $( "#popupdialog #delExpense").html($(this).children("td.object").html()+ "?");
+        $( "#popupDialog #delExpense").html($(this).children("td.object").html()+ "?");
         $( "#deleteBtn" ).unbind().click(
             function ()
             {
