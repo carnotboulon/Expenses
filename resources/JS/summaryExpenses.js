@@ -1,5 +1,5 @@
 $(function() {
-    //Attach dble click handler on table elements.
+    //Attach dble CLICK handler on table elements to delete the element.
     $('table tr').dblclick(function(event){
         console.log($(this).attr("id"));
         var that = $(this);
@@ -16,7 +16,7 @@ $(function() {
         $( "#popupDialog" ).popup( "open");
         });
         
-        
+    //Attach dble TAP handler on table elements to delete the element.   
     $('table tr').on('tap', function() {
         console.log($(this).attr("id"));
         var that = $(this);
