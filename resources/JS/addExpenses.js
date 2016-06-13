@@ -70,14 +70,38 @@ $(function() {
     
     
     $('#submitForm').click(function(event){
+        msg = "";
+        if ($("#whatValue").val() == ""){
+                
+                msg += "Object, ";
+        }
+        if ($("#priceValue").val() == ""){
+            msg += "Price, ";
+        }
+        if ($("input:checkbox[name='catValues']:checked").length == 0){
+            msg += "Categories, ";
+        }
+        if ($("#whenValue").val() == ""){
+            msg += "Date, ";
+        }
+        if ($("input:radio[name='shopValue']:checked").length == 0){
+            msg += "Shop, ";
+        }
+        if ($("input:checkbox[name='benefsValue']:checked").length == 0){
+            msg += "Beneficiaries, ";
+        }       
         
         // Updating popup text and link.
-        $( "#popupError #ErrorInput").html("Toudou");
-        $( "#popupError #validateBtn" ).click(function (){
-                $('#AddExpenseForm').submit();
-                console.log("Submit form");               
-        });         
-        $('#popupError').popup("open");    
+        if (msg == ""){
+            $('#AddExpenseForm').submit();           
+        }
+        else{
+            msg = msg.substring(0,msg.length - 2) + "."
+            $( "#popupError #ErrorInput").html(msg);
+            $('#popupError').popup("open");
+        }
+        console.log(msg);
+            
     });
     
     

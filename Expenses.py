@@ -1,7 +1,7 @@
 # [START imports]
 from google.appengine.api import users
 from google.appengine.ext import ndb
-import os, datetime, webapp2, logging, urllib
+import os, time, datetime, webapp2, logging, urllib
 
 import jinja2
 import webapp2
@@ -61,7 +61,7 @@ class RenderModel(ndb.Model):
             elements = []
             for el in val:
                 # if attribute value is a string, a float, a date or a time, use it as it is.
-                if type(el) == unicode or type(el) == float or type(el) == datetime.date or type(el) == datetime.datetime or type(el) == int:
+                if type(el) == unicode or type(el) == float or type(el) == datetime.date or type(el) == datetime.datetime or type(el) == int or type(el) == bool:
                     elements.append(el)
                 # else if attribute value is not none, it is a key (a reference to another entity) => get its value from Datastore.
                 elif el is not None:
@@ -139,7 +139,14 @@ class Expense(RenderModel):
 
     recordedBy = ndb.KeyProperty(kind='Person', indexed = True, required = True)
     recordedOn = ndb.DateTimeProperty(indexed = True, required = True)
- 
+
+class ToBuy(RenderModel):
+    _use_cache = False
+    _use_memcache = False
+    object = ndb.StringProperty(indexed = True, required = True)
+    categories = ndb.KeyProperty(kind='ExpenseCategory', indexed = True, repeated = True)
+    enabled = ndb.BooleanProperty(indexed = True, required = True)
+    
 def sumAttribute(itemList, attribute):
     sum = 0
     for item in itemList:
@@ -260,9 +267,9 @@ class BalancePage(webapp2.RequestHandler):
                 bilan = comptes[k]["exp"] - comptes[k]["benef"]
                 logging.info(bilan)
                 if bilan > 0:
-                    action = "%s needs %s EUR back" % (Person.get_by_id(k).firstName, bilan)
+                    action = "%s needs %.2f EUR back" % (Person.get_by_id(k).firstName, bilan)
                 elif bilan < 0:
-                    action = "%s ows %s EUR" % (Person.get_by_id(k).firstName, -bilan)
+                    action = "%s ows %.2f EUR" % (Person.get_by_id(k).firstName, -bilan)
                 else:
                     action = "%s %s is fine." % (Person.get_by_id(k).firstName, Person.get_by_id(k).lastName)
                 logging.info(action)
@@ -389,12 +396,104 @@ class AddExpense(webapp2.RequestHandler):
                 template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
                 self.response.write(template.render({"email":user.email().lower()}))
 
-class RemoveExpense(webapp2.RequestHandler):
+class RemoveEntity(webapp2.RequestHandler):
     def get(self):
-        exp = ndb.Key(urlsafe=self.request.get('exp'))
-        logging.info("Removing: %s" % exp.get().object)
-        exp.delete()
-             
+        ent = ndb.Key(urlsafe=self.request.get('id'))
+        logging.info("Removing: %s" % ent.get().object)
+        ent.delete()
+        
+class DisableEntity(webapp2.RequestHandler):
+    def get(self):
+        ent = ndb.Key(urlsafe=self.request.get('id')).get()
+        logging.info("Disabling: %s" % ent.object)
+        ent.enabled = False
+        ent.put()
+
+class ToBuyPage(webapp2.RequestHandler):
+    def get(self):
+        user = users.get_current_user()
+        if not user:
+            self.redirect(users.create_login_url(self.request.uri))       
+        else:
+            # Get data.
+            expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
+            toBuyList = [tb.render() for tb in ToBuy.query().order(ToBuy.object)]
+            # logging.info("ToBuy: %s" % toBuyList)
+            cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.name)]
+            template_values = {
+                'user': user.email().lower(),
+                'toBuyList': toBuyList,
+                'categoryList': cat
+            }
+            
+            if user.email().lower() in authorized_users:
+                template = JINJA_ENVIRONMENT.get_template('toBuyMobile.html')
+                self.response.write(template.render(template_values))
+            else:
+                template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
+                self.response.write(template.render({"email":user.email().lower()}))
+    
+
+class ToBuyAddPage(webapp2.RequestHandler):
+    def get(self):
+        user = users.get_current_user()
+        if not user:
+            self.redirect(users.create_login_url(self.request.uri))       
+        else:
+            # Get data.
+            expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
+            toBuyList = [tb.render() for tb in ToBuy.query().order(ToBuy.object)]
+            # logging.info("ToBuy: %s" % toBuyList)
+            cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.name)]
+            template_values = {
+                'user': user.email().lower(),
+                'toBuyList': toBuyList,
+                'categoryList': cat
+            }
+            
+            if user.email().lower() in authorized_users:
+                template = JINJA_ENVIRONMENT.get_template('addToBuyMobile.html')
+                self.response.write(template.render(template_values))
+            else:
+                template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
+                self.response.write(template.render({"email":user.email().lower()}))
+    
+    def post(self):
+        user = users.get_current_user()
+        if not user:
+            self.redirect(users.create_login_url(self.request.uri))
+        else:
+            expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
+                       
+            # Check if object already exist.
+            newtoBuy = self.request.get('articleValue').capitalize()
+            toBuyList = [tb.object for tb in ToBuy.query(ancestor=expensebook_key(expensebook_name)).fetch()]
+            
+            # if object already exist, enable it.
+            if newtoBuy in toBuyList:
+                toBuy = ToBuy.query(ToBuy.object == newtoBuy).get()         
+                toBuy.enabled = True
+            
+            # else create it.
+            else:
+                toBuy = ToBuy(parent=expensebook_key(expensebook_name))
+                toBuy.object = newtoBuy
+                
+                cats = self.request.get_all('catValues')
+                toBuy.categories = [ndb.Key(urlsafe=cat) for cat in cats]
+                
+                toBuy.enabled = True
+                
+            
+            if user.email().lower() in authorized_users:
+                # logging.info("Expense: %s" % expense.render())
+                toBuy.put()
+                time.sleep(1)
+                self.redirect('/toBuy')
+            else:
+                template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
+                self.response.write(template.render({"email":user.email().lower()}))
+        
 class FeedData(webapp2.RequestHandler):
     def get(self):
         self.response.write("Bonjour c'est dans la boite.")
@@ -437,7 +536,10 @@ app = webapp2.WSGIApplication([
     # ('/feed', FeedData),
     ('/add', AddExpense),
     ('/balance', BalancePage),
-    ('/remove', RemoveExpense),
+    ('/remove', RemoveEntity),
+    ('/disable', DisableEntity),
+    ('/toBuy', ToBuyPage),
+    ('/toBuyAdd', ToBuyAddPage),
     
     
 ], debug=True)

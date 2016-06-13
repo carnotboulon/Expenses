@@ -140,7 +140,7 @@
                 <label for="shop-1">test</label>  -->
                 {% for shop in shopList %}
                     <input type="radio" name="shopValue" id="shop-{{shop.id}}" value="{{ shop.id }}" />
-                    <label for="shop-{{shop.id}}">{{ shop.name }}</label>         
+                    <label for="shop-{{shop.id}}">{{ shop.name }}</label>      
                 {% endfor %}
                 </fieldset>
         </div><!-- /content -->
@@ -226,7 +226,7 @@
         <div data-role="content">	
             <div data-role="popup" id="popupError" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
                 <div data-role="header" data-theme="a">
-                    <h1>Expense cannot be saved!</h1>
+                    <h1>Info Missing!</h1>
                 </div>
                 <div role="main" style="text-align:center" class="ui-content">
                     <h3 class="ui-title">Please fill in</h3>

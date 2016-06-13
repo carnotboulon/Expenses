@@ -1,4 +1,14 @@
+$(document).on("pagecreate", "#expenseSummary", function(){
+    $("#expenseSummary .ui-checkbox label")[2].click();
+    $("#expenseSummary .ui-checkbox label")[5].click();
+    $("#expenseSummary .ui-checkbox label")[6].click();
+    $("#expenseSummary .ui-checkbox label")[7].click();
+    $("#expenseSummary .ui-checkbox label")[8].click();
+});
+
+
 $(function() {
+    
     //Attach dble CLICK handler on table elements to delete the element.
     $('table tr').dblclick(function(event){
         console.log($(this).attr("id"));
@@ -10,7 +20,7 @@ $(function() {
             {
                 console.log("Removing:" + that.attr("id"));
                 that.remove();                               //removes it from the html page.
-                $.ajax("/remove?exp="+that.attr("id"));      //removes it from DB.
+                $.ajax("/remove?id="+that.attr("id"));      //removes it from DB.
             }
         );         
         $( "#popupDialog" ).popup( "open");
@@ -27,7 +37,7 @@ $(function() {
             {
                 console.log("Removing:" + that.attr("id"));
                 that.remove();                               //removes it from the html page.
-                $.ajax("/remove?exp="+that.attr("id"));      //removes it from DB.
+                $.ajax("/remove?id="+that.attr("id"));      //removes it from DB.
             }
         );         
         $( "#popupDialog" ).popup( "open");
