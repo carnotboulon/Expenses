@@ -6,7 +6,6 @@ $(document).on("pagecreate", "#expenseSummary", function(){
     $("#expenseSummary .ui-checkbox label")[8].click();
 });
 
-
 $(function() {
     
     //Attach dble CLICK handler on table elements to delete the element.
