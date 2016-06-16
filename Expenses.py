@@ -532,9 +532,9 @@ class FeedData(webapp2.RequestHandler):
         
         
 app = webapp2.WSGIApplication([
-    ('/', ExpensesPage),
+    ('/list', ExpensesPage),
     # ('/feed', FeedData),
-    ('/add', AddExpense),
+    ('/', AddExpense),
     ('/balance', BalancePage),
     ('/remove', RemoveEntity),
     ('/disable', DisableEntity),
