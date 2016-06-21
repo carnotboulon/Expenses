@@ -391,7 +391,8 @@ class AddExpense(webapp2.RequestHandler):
                 expense.put()
                 
                 query_params = {'expensebook_name': expensebook_name}
-                self.redirect('/?' + urllib.urlencode(query_params))
+                # self.redirect('/?' + urllib.urlencode(query_params))
+                self.redirect('/list')
             else:
                 template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
                 self.response.write(template.render({"email":user.email().lower()}))
@@ -490,6 +491,7 @@ class ToBuyAddPage(webapp2.RequestHandler):
                 toBuy.put()
                 time.sleep(1)
                 self.redirect('/toBuy')
+                return
             else:
                 template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
                 self.response.write(template.render({"email":user.email().lower()}))
