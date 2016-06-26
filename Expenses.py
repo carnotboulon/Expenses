@@ -147,45 +147,21 @@ class ToBuy(RenderModel):
     categories = ndb.KeyProperty(kind='ExpenseCategory', indexed = True, repeated = True)
     enabled = ndb.BooleanProperty(indexed = True, required = True)
     
-def sumAttribute(itemList, attribute):
-    sum = 0
-    for item in itemList:
-        sum += float(getattr(item, attribute))
-    return sum
-
-def getExpenseByPerson(personEmail):
-    p = Person.query(Person.email == personEmail).get()
-    logging.info("Expenses from : %s %s" % (p.firstName, p.lastName))
-    expenses = Expense.query(Expense.buyers == p.key).fetch()
-    
-    amount = 0.
-    weight = 0.
-    for exp in expenses:
-        weight = 0
-        if p.key in exp.beneficiaries:
-            weight = 1. / exp.nb_beneficiaries
-        else:
-            weight = 1.
-        part = exp.price * weight
-        logging.info("Sub total =  %s" % (part))
-        amount += part
-    
-    logging.info("Total Amount = %s" % (amount))
-    return amount
-
 def computeBalance(expensebook_name):
     pers = Person.query().fetch()
     # logging.info([p.key.id() for p in pers])
     persDict = {}
+    
+    # Initialize personal counts.
     for p in pers:
         persDict[p.key.id()] = {"exp": 0., "benef": 0.}
         
         # Initialise la valeur pour Arn au bilan du 06 JUN 2016.
         # Derniere depense = Bic pour faire-part 06 JUN 16, 5.77 EUR.
-        if p.email == "arnaudboland@gmail.com":
-            persDict[p.key.id()]["benef"] = 341.50 + 88.09
-        if p.email == "stephanie.thys@gmail.com":
-            persDict[p.key.id()]["exp"] = 341.50 + 88.09
+        # if p.email == "arnaudboland@gmail.com":
+            # persDict[p.key.id()]["benef"] = 341.50 + 88.09
+        # if p.email == "stephanie.thys@gmail.com":
+            # persDict[p.key.id()]["exp"] = 341.50 + 88.09
     
     # logging.info(persDict)
     expenses = Expense.query(ancestor = expensebook_key(expensebook_name))
@@ -208,9 +184,7 @@ def computeBalance(expensebook_name):
             # logging.info("Comptes %s apres: %s" % (benef.get().email, persDict[benef.id()]))
             
     return persDict
-    
-def getBalanceBetweenPersons(personA, personB):
-    pass
+
     
 #  [START PAGES]
 class ExpensesPage(webapp2.RequestHandler):
@@ -243,10 +217,10 @@ class ExpensesPage(webapp2.RequestHandler):
             }
             
             if user.email().lower() in authorized_users:
-                template = JINJA_ENVIRONMENT.get_template('expensesMobile.html')
+                template = JINJA_ENVIRONMENT.get_template('expenseList.html')
                 self.response.write(template.render(template_values))
             else:
-                template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
+                template = JINJA_ENVIRONMENT.get_template('unauthorized.html')
                 self.response.write(template.render({"email":user.email().lower()}))
         
 class BalancePage(webapp2.RequestHandler):
@@ -266,9 +240,9 @@ class BalancePage(webapp2.RequestHandler):
                 logging.info("\ta beneficie : %s" % (comptes[k]["benef"]))
                 bilan = comptes[k]["exp"] - comptes[k]["benef"]
                 logging.info(bilan)
-                if bilan > 0:
+                if bilan > 0.01:
                     action = "%s needs %.2f EUR back" % (Person.get_by_id(k).firstName, bilan)
-                elif bilan < 0:
+                elif bilan < 0.01:
                     action = "%s ows %.2f EUR" % (Person.get_by_id(k).firstName, -bilan)
                 else:
                     action = "%s %s is fine." % (Person.get_by_id(k).firstName, Person.get_by_id(k).lastName)
@@ -279,10 +253,10 @@ class BalancePage(webapp2.RequestHandler):
                 template_values = {
                     'actions': actions
                 }
-                template = JINJA_ENVIRONMENT.get_template('balanceMobile.html')
+                template = JINJA_ENVIRONMENT.get_template('expenseBalance.html')
                 self.response.write(template.render(template_values))
             else:
-                template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
+                template = JINJA_ENVIRONMENT.get_template('unauthorized.html')
                 self.response.write(template.render({"email":user.email().lower()}))
         
 class AddExpense(webapp2.RequestHandler):
@@ -330,10 +304,10 @@ class AddExpense(webapp2.RequestHandler):
                 'payTypes': payTypes
             }
             if user.email().lower() in authorized_users:
-                template = JINJA_ENVIRONMENT.get_template('addMobile.html')
+                template = JINJA_ENVIRONMENT.get_template('expenseAdd.html')
                 self.response.write(template.render(template_values))
             else:
-                template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
+                template = JINJA_ENVIRONMENT.get_template('unauthorized.html')
                 self.response.write(template.render({"email":user.email().lower()}))
            
     def post(self): 
@@ -394,7 +368,7 @@ class AddExpense(webapp2.RequestHandler):
                 # self.redirect('/?' + urllib.urlencode(query_params))
                 self.redirect('/list')
             else:
-                template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
+                template = JINJA_ENVIRONMENT.get_template('unauthorized.html')
                 self.response.write(template.render({"email":user.email().lower()}))
 
 class RemoveEntity(webapp2.RequestHandler):
@@ -428,10 +402,10 @@ class ToBuyPage(webapp2.RequestHandler):
             }
             
             if user.email().lower() in authorized_users:
-                template = JINJA_ENVIRONMENT.get_template('toBuyMobile.html')
+                template = JINJA_ENVIRONMENT.get_template('toBuyList.html')
                 self.response.write(template.render(template_values))
             else:
-                template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
+                template = JINJA_ENVIRONMENT.get_template('unauthorized.html')
                 self.response.write(template.render({"email":user.email().lower()}))
     
 
@@ -453,10 +427,10 @@ class ToBuyAddPage(webapp2.RequestHandler):
             }
             
             if user.email().lower() in authorized_users:
-                template = JINJA_ENVIRONMENT.get_template('addToBuyMobile.html')
+                template = JINJA_ENVIRONMENT.get_template('toBuyAdd.html')
                 self.response.write(template.render(template_values))
             else:
-                template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
+                template = JINJA_ENVIRONMENT.get_template('unauthorized.html')
                 self.response.write(template.render({"email":user.email().lower()}))
     
     def post(self):
@@ -493,7 +467,7 @@ class ToBuyAddPage(webapp2.RequestHandler):
                 self.redirect('/toBuy')
                 return
             else:
-                template = JINJA_ENVIRONMENT.get_template('unauthorizedMobile.html')
+                template = JINJA_ENVIRONMENT.get_template('unauthorized.html')
                 self.response.write(template.render({"email":user.email().lower()}))
         
 class FeedData(webapp2.RequestHandler):
