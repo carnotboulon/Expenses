@@ -65,9 +65,3 @@ for (i,promoHTML) in enumerate(promosHTML):
 print "%s promos found." % len(promos)
 # print "Last promos = %s >>> %s" % (promos[-1]["marque"], promos[-1]["prix"])
 
-
-
-    
-
-       
-        

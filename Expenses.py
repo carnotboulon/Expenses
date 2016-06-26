@@ -503,7 +503,7 @@ class FeedData(webapp2.RequestHandler):
         # arn = ndb.Key(urlsafe="agxzfmJhbmRwbW9uZXlyEwsSBlBlcnNvbhiAgICAnZSHCgw").get()
         # steph = ndb.Key(urlsafe="agxzfmJhbmRwbW9uZXlyEwsSBlBlcnNvbhiAgICA692ICgw").get()
         
-        # BankAccount(owner = [arn.key,steph.key], name = "Commun Courant", number = "123-456789-11", bank = "Belfius").put()
+        # BankAccount(owner = [arn.key,steph.key], name = "Tickets Restaurant", number = "", bank = "No Bank").put()
         # BankAccount(owner = [arn.key], name = "Arn MasterCard", number = "123-456789-11", bank = "Belfius").put()
         
         # Shop(name = "Brico").put()
