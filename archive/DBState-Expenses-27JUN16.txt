@@ -1,0 +1,31 @@
+Date	Shop	Category	What?	Price	Bought by?	Bought for?	Paid with?	Recorded By	Recorded On
+27 Jun 16	Delhaize	Alimentation	Courses	14.75	Stéphanie	Arnaud, Stéphanie	Steph Courant	Stéphanie	27 Jun 16 13:17
+25 Jun 16	Autre	Entretien, Jardin	Gazon	4.95	Arnaud	Arnaud, Stéphanie	Arn Courant	Arnaud	25 Jun 16 12:35
+25 Jun 16	Delhaize	Alimentation	Courses hebdomadaires	81.37	Arnaud, Stéphanie	Arnaud, Stéphanie	Tickets Restaurant	Stéphanie	26 Jun 16 09:13
+24 Jun 16	Autre	Restaurant	La Barchetta	38.1	Arnaud	Arnaud	Arn Courant	Arnaud	24 Jun 16 19:06
+22 Jun 16	Magasin Vêtement	Cadeau	Cadeau pour Valentine pour remercier Sandrine des prêts	32.3	Stéphanie	Arnaud, Stéphanie	Steph Courant	Stéphanie	22 Jun 16 13:37
+20 Jun 16	Delhaize	Alimentation	Courses hebdomadaires	103.19	Arnaud	Arnaud, Stéphanie	Arn Courant	Stéphanie	23 Jun 16 11:45
+20 Jun 16	Magasin Vêtement	Cadeau	Cadeau naissance Charline Hamoir - petite robe jacadi	27.3	Stéphanie	Arnaud, Stéphanie	Steph Courant	Stéphanie	20 Jun 16 16:31
+20 Jun 16	Magasin Vêtement	Cadeau	Cadeau naissance Victor - pull bleu ciel jacadi	27.3	Stéphanie	Arnaud, Stéphanie	Steph Courant	Stéphanie	20 Jun 16 16:30
+20 Jun 16	Carrefour	Alimentation	Courses	23.19	Stéphanie	Arnaud, Stéphanie	Steph Courant	Stéphanie	21 Jun 16 17:53
+20 Jun 16	Magasin Vêtement	Sissi	Sortie de bain jacadi	27.3	Stéphanie	Arnaud, Stéphanie	Steph Courant	Stéphanie	20 Jun 16 16:33
+18 Jun 16	Delhaize	Alimentation	Courses	12.44	Arnaud	Arnaud, Stéphanie	Arn Courant	Stéphanie	18 Jun 16 17:51
+18 Jun 16	Autre	Restaurant	Quick	4.1	Arnaud	Arnaud, Stéphanie	Arn Courant	Stéphanie	18 Jun 16 17:50
+17 Jun 16	Delhaize	Alimentation	Courses	34.4	Stéphanie	Arnaud, Stéphanie	Steph Courant	Arnaud	18 Jun 16 10:46
+15 Jun 16	Online	Sissi	Baignoire Shantala - vide dressing kids	12.0	Stéphanie	Arnaud, Stéphanie	Steph Courant	Stéphanie	15 Jun 16 09:31
+14 Jun 16	Autre	Sissi	Faire part de naissance - acompte	200.0	Arnaud, Stéphanie	Arnaud, Stéphanie	Commun Courant	Stéphanie	15 Jun 16 09:35
+13 Jun 16	Autre	Abonnement, Eau	Eau juin 2015-juin2016	219.29	Arnaud, Stéphanie	Arnaud, Stéphanie	Commun Courant	Arnaud	13 Jun 16 11:53
+13 Jun 16	Autre	Grossesse, Santé	Consult Gyneco	60.0	Stéphanie	Arnaud, Stéphanie	Steph Courant	Stéphanie	13 Jun 16 11:45
+13 Jun 16	Autre	Remboursement	Remise à niveau	437.19	Arnaud	Stéphanie	Arn Courant	Arnaud	26 Jun 16 18:51
+13 Jun 16	Delhaize	Alimentation	Courses lunch midi	10.42	Arnaud	Arnaud, Stéphanie	Arn Courant	Arnaud	13 Jun 16 11:23
+11 Jun 16	Delhaize	Alimentation	Courses hebdomadaires	80.09	Arnaud	Arnaud, Stéphanie	Arn Courant	Arnaud	11 Jun 16 14:23
+11 Jun 16	Pharmacie	Arn, Soin	Shampoo	13.08	Arnaud	Arnaud, Stéphanie	Arn Courant	Arnaud	11 Jun 16 12:47
+11 Jun 16	Autre	Cadeau	Livre paps	25.0	Arnaud	Arnaud, Stéphanie	Arn Courant	Arnaud	11 Jun 16 12:45
+11 Jun 16	Autre	Restaurant	Cafe al dente	23.6	Arnaud	Arnaud	Arn Courant	Arnaud	11 Jun 16 13:09
+10 Jun 16	Carrefour	Alimentation	Alimentation	22.94	Stéphanie	Arnaud, Stéphanie	Steph Courant	Stéphanie	10 Jun 16 13:53
+10 Jun 16	Online	Entretien	Titres services	360.0	Arnaud, Stéphanie	Arnaud, Stéphanie	Commun Courant	Stéphanie	15 Jun 16 09:36
+10 Jun 16	Autre	Maison	Double clé de la maison	25.0	Stéphanie	Arnaud, Stéphanie	Steph Courant	Stéphanie	10 Jun 16 13:51
+07 Jun 16	Online	Sissi, Vêtements	Couverture Red Castle sur vide dressing des petits	20.0	Stéphanie	Arnaud, Stéphanie	Steph Courant	Arnaud	08 Jun 16 20:05
+07 Jun 16	Delhaize	Alimentation	Alimentation	25.83	Stéphanie	Arnaud, Stéphanie	Steph Courant	Arnaud	08 Jun 16 20:02
+06 Jun 16	Autre	Remboursement	Situation Initiale des Comptes	429.59	Stéphanie	Arnaud	Steph Courant	Arnaud	26 Jun 16 18:53
+02 Jun 16	Ikea	Maison	Meuble TV	9.99	Arnaud	Arnaud, Stéphanie	Arn Courant	Arnaud	02 Jun 16 20:59

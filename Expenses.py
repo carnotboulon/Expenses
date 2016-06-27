@@ -103,7 +103,8 @@ class Shop(RenderModel):
 class ExpenseCategory(RenderModel):
     _use_cache = False
     _use_memcache = False
-    name = ndb.StringProperty(indexed=True, required = True)
+    category = ndb.StringProperty(indexed=True, required = True)
+    subcategory = ndb.StringProperty(indexed=True, required = False)
 
 class BankAccount(RenderModel):
     _use_cache = False
@@ -123,10 +124,11 @@ class Expense(RenderModel):
     _use_memcache = False
     date = ndb.DateProperty(indexed =  True, required = True)	# Expense date.
     object = ndb.StringProperty(indexed = True, required = True)
+    comment = ndb.StringProperty(indexed = False, required = False)
     price = ndb.FloatProperty(indexed = True, required = True)
     currency = ndb.KeyProperty(kind='Currency', required = True)
 
-    shop = ndb.KeyProperty(kind='Shop', indexed = True, required = True)
+    # shop = ndb.KeyProperty(kind='Shop', indexed = True, required = True)
     categories = ndb.KeyProperty(kind='ExpenseCategory', indexed = True, repeated = True)
     account = ndb.KeyProperty(kind='BankAccount', indexed = True, required = True)
 
@@ -277,7 +279,7 @@ class AddExpense(webapp2.RequestHandler):
             # cur = [c.render() for c in Currency.query().order(Currency.name)]
             # logging.info("Currencies: %s" % cur)
             
-            cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.name)]
+            cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.category)]
             # logging.info("Cats: %s" % cat)
             
             pers = [p.render() for p in Person.query().order(Person.firstName)]
@@ -333,7 +335,7 @@ class AddExpense(webapp2.RequestHandler):
             expense.currency = Currency.query(Currency.code == "EUR").get().key
             
             # logging.info("Shop: %s" % self.request.get_all('shopValue'))
-            expense.shop = ndb.Key(urlsafe=self.request.get_all('shopValue')[0])
+            # expense.shop = ndb.Key(urlsafe=self.request.get_all('shopValue')[0])
             #expense.shop = Shop.query(Shop.name == self.request.get('shop')).get().key
             
             # logging.info("Categories: %s" % self.request.get_all('catValues'))
@@ -394,7 +396,7 @@ class ToBuyPage(webapp2.RequestHandler):
             expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
             toBuyList = [tb.render() for tb in ToBuy.query().order(ToBuy.object)]
             # logging.info("ToBuy: %s" % toBuyList)
-            cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.name)]
+            cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.category)]
             template_values = {
                 'user': user.email().lower(),
                 'toBuyList': toBuyList,
@@ -408,7 +410,6 @@ class ToBuyPage(webapp2.RequestHandler):
                 template = JINJA_ENVIRONMENT.get_template('unauthorized.html')
                 self.response.write(template.render({"email":user.email().lower()}))
     
-
 class ToBuyAddPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
@@ -419,7 +420,7 @@ class ToBuyAddPage(webapp2.RequestHandler):
             expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
             toBuyList = [tb.render() for tb in ToBuy.query().order(ToBuy.object)]
             # logging.info("ToBuy: %s" % toBuyList)
-            cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.name)]
+            cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.category)]
             template_values = {
                 'user': user.email().lower(),
                 'toBuyList': toBuyList,
@@ -474,12 +475,14 @@ class FeedData(webapp2.RequestHandler):
     def get(self):
         self.response.write("Bonjour c'est dans la boite.")
         
-        # arn = ndb.Key(urlsafe="agxzfmJhbmRwbW9uZXlyEwsSBlBlcnNvbhiAgICAnZSHCgw").get()
+        arn = ndb.Key(urlsafe="aghkZXZ-Tm9uZXITCxIGUGVyc29uGICAgICAgKQIDA").get()
         # steph = ndb.Key(urlsafe="agxzfmJhbmRwbW9uZXlyEwsSBlBlcnNvbhiAgICA692ICgw").get()
         
+        account = ndb.Key(urlsafe="aghkZXZ-Tm9uZXIYCxILQmFua0FjY291bnQYgICAgICAxAkM").get()
         # BankAccount(owner = [arn.key,steph.key], name = "Tickets Restaurant", number = "", bank = "No Bank").put()
         # BankAccount(owner = [arn.key], name = "Arn MasterCard", number = "123-456789-11", bank = "Belfius").put()
         
+        cur = ndb.Key(urlsafe="aghkZXZ-Tm9uZXIVCxIIQ3VycmVuY3kYgICAgICAhAkM").get()
         # Shop(name = "Brico").put()
         # Shop(name = "Match").put()
         # Shop(name = "Pharmacie").put()
@@ -493,7 +496,12 @@ class FeedData(webapp2.RequestHandler):
         # shops = [s.render() for s in Shop.query().order(Shop.name)]
         # logging.info("Shops: %s" % shops)
         
-        # cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.name)]
+        cat = ndb.Key(urlsafe="aghkZXZ-Tm9uZXIcCxIPRXhwZW5zZUNhdGVnb3J5GICAgICA1L4JDA").get()
+        # ExpenseCategory(category="Alimentation",subcategory="Fruits").put()
+        # ExpenseCategory(category="Alimentation",subcategory="Legumes").put()
+        # ExpenseCategory(category="Techs").put()
+        
+        # cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.category)]
         # for c in cat:
             # logging.info("%s" % c)
         
@@ -504,12 +512,14 @@ class FeedData(webapp2.RequestHandler):
         # accounts = [a.render() for a in BankAccount.query().order(BankAccount.name)]
         # for a in accounts:
             # logging.info("%s %s %s" % (a["number"], a["bank"], a["owner"][0]["id"]))
-        
-        
+        pt = ndb.Key(urlsafe="aghkZXZ-Tm9uZXIZCxIMUGF5ZW1lbnRUeXBlGICAgICAgMQKDA").get()
+        Expense(parent = expensebook_key(), date=datetime.datetime.now(), object="fifi", comment="tidi", price=5.0, currency = cur.key, categories=[cat.key], account = account.key, buyers = [arn.key], beneficiaries = [arn.key], payType = pt.key,recordedBy = arn.key, recordedOn = datetime.datetime.now() ).put()
+       
+        pass
         
 app = webapp2.WSGIApplication([
     ('/list', ExpensesPage),
-    # ('/feed', FeedData),
+    ('/feed', FeedData),
     ('/', AddExpense),
     ('/balance', BalancePage),
     ('/remove', RemoveEntity),

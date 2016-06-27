@@ -58,7 +58,7 @@
                 </fieldset>
                 <fieldset data-role="controlgroup" data-filter="true" data-filter-reveal="true" data-input="#catValue">
                     {% for cat in categoryList %}
-                        <label for="cat-{{cat.id}}">{{ cat.name }}</label>
+                        <label for="cat-{{cat.id}}">{{ cat.category }}</label>
                         <input type="checkbox" name="catValues" value="{{cat.id}}" id="cat-{{cat.id}}" />
                     {% endfor %}
                 </fieldset>

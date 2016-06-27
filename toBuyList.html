@@ -53,7 +53,7 @@
                 {% if toBuy.enabled %}
                     <tr id="{{ toBuy.id }}">
                         <td class="object">{{ toBuy.object }}</td>
-                        <td class="cat">{{ toBuy.categories|join(', ',attribute="name") }}</td>
+                        <td class="cat">{{ toBuy.categories|join(', ',attribute="category") }}</td>
                     </tr>
                 {% endif %}
             {% endfor %}
