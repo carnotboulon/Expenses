@@ -63,7 +63,7 @@
             {% for expense in expenses %}
                 <tr id="{{ expense.id }}">
                     <td class="date">{{ expense.date.strftime('%d %b %y') }}</td>
-                    <td class="cat">{{ expense.categories|join(', ',attribute="category") }}</td>
+                    <td class="cat">{{ expense.categories|join(', ',attribute="name") }}</td>
                     <td class="object">{{ expense.object }}</td>
                     <td class="price">{{ expense.price }}</td>
                     <td class="buyers">{{ expense.buyers|join(', ',attribute="firstName") }} </td>

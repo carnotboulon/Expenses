@@ -52,17 +52,20 @@
                 </ul>
                 
                 <!-- http://stackoverflow.com/questions/20432467/jquery-mobile-filtering-a-listview-of-checkboxes-causes-unstyled-checkboxes-to -->
-                <legend>Categories</legend>
                 <fieldset>
-                  <input type="text" data-type="search" id="catValue">
+                    <label for="catSelect">Category</label>
+                    <select name="catSelect" id="catSelect">
+                        {% for cat in subcategoryList %}
+                            <option value="{{cat.id}}">{{ cat.name }}</option>                            
+                        {% endfor %}
+                    </select>
                 </fieldset>
-                <fieldset data-role="controlgroup" data-filter="true" data-filter-reveal="true" data-input="#catValue">
-                    {% for cat in categoryList %}
-                        <label for="cat-{{cat.id}}">{{ cat.category }}</label>
-                        <input type="checkbox" name="catValues" value="{{cat.id}}" id="cat-{{cat.id}}" />
-                    {% endfor %}
+                <BR/>
+                <BR/>
+                <BR/>
+                <fieldset>
+                    <input type="button" id="submitForm" value="Confirm">
                 </fieldset>
-                <input type="button" id="submitForm" value="Confirm">
             </form>
         </div><!-- /content -->
         

@@ -1,7 +1,14 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # [START imports]
 from google.appengine.api import users
 from google.appengine.ext import ndb
 import os, time, datetime, webapp2, logging, urllib
+
+# 28JUIN16 - ne fonctionne pas car un élément "toBuy" reçoit comme subcategorie 
+# soit une ExpenseCategory soit une ExpenseSubcategory. Il faut donc vérifier query
+# la propriété subcategory de l'élément toBuy peut prendre des entités différentes (catgory ou subcategory).
 
 import jinja2
 import webapp2
@@ -103,9 +110,9 @@ class Shop(RenderModel):
 class ExpenseCategory(RenderModel):
     _use_cache = False
     _use_memcache = False
-    category = ndb.StringProperty(indexed=True, required = True)
-    subcategory = ndb.StringProperty(indexed=True, required = False)
-
+    name = ndb.StringProperty(indexed=True, required = True)
+    parentCategory = ndb.KeyProperty(kind='ExpenseCategory', indexed = True, required = False)
+   
 class BankAccount(RenderModel):
     _use_cache = False
     _use_memcache = False
@@ -146,7 +153,7 @@ class ToBuy(RenderModel):
     _use_cache = False
     _use_memcache = False
     object = ndb.StringProperty(indexed = True, required = True)
-    categories = ndb.KeyProperty(kind='ExpenseCategory', indexed = True, repeated = True)
+    category = ndb.KeyProperty(kind='ExpenseCategory', indexed = True, required = True)
     enabled = ndb.BooleanProperty(indexed = True, required = True)
     
 def computeBalance(expensebook_name):
@@ -279,8 +286,18 @@ class AddExpense(webapp2.RequestHandler):
             # cur = [c.render() for c in Currency.query().order(Currency.name)]
             # logging.info("Currencies: %s" % cur)
             
-            cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.category)]
-            # logging.info("Cats: %s" % cat)
+            cat = []
+            catIds = []
+            for c in ExpenseCategory.query():
+                if c.parentCategory == None and c.render()["id"] not in catIds:
+                    cat.append(c.render())
+                    catIds.append(c.render()["id"])
+                elif c.parentCategory != None and c.parentCategory.get().render()["id"] not in catIds:
+                    cat.append(c.parentCategory.get().render())
+                    catIds.append(c.parentCategory.get().render()["id"])
+            
+            sortedCat = sorted(cat, key=lambda k: k['name'])
+            logging.info("Cats: %s" % sortedCat)
             
             pers = [p.render() for p in Person.query().order(Person.firstName)]
             # logging.info("Persons: %s" % pers)
@@ -329,6 +346,8 @@ class AddExpense(webapp2.RequestHandler):
             
             # logging.info("Object: %s" % self.request.get('whatValue'))
             expense.object = self.request.get('whatValue')
+            
+            expense.comment = self.request.get("commentValue")
             
             # logging.info("Price: %s" % self.request.get('priceValue'))
             expense.price = float(self.request.get('priceValue'))
@@ -394,13 +413,13 @@ class ToBuyPage(webapp2.RequestHandler):
         else:
             # Get data.
             expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
-            toBuyList = [tb.render() for tb in ToBuy.query().order(ToBuy.object)]
+            toBuyList = [tb.render() for tb in ToBuy.query().order(ToBuy.category)]
             # logging.info("ToBuy: %s" % toBuyList)
-            cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.category)]
+            
             template_values = {
                 'user': user.email().lower(),
                 'toBuyList': toBuyList,
-                'categoryList': cat
+                # 'subcategoryList': catList.sort()
             }
             
             if user.email().lower() in authorized_users:
@@ -420,11 +439,42 @@ class ToBuyAddPage(webapp2.RequestHandler):
             expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
             toBuyList = [tb.render() for tb in ToBuy.query().order(ToBuy.object)]
             # logging.info("ToBuy: %s" % toBuyList)
-            cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.category)]
+            
+            
+            # Prendre toutes les catégories qui on un parent non nul et stocker le parent dans une liste séparée. 
+            # Reparcourir la liste des categories et retirer celles qui sont des parents.
+            cats = ExpenseCategory.query()
+            catList = [c.render() for c in cats]
+            parentCats = [c.parentCategory.urlsafe() for c in cats if c.parentCategory != None]   # Gets the parent categories ids.         
+            
+            for cat in catList:
+                logging.info("%s - %s" %(cat["name"], cat["parentCategory"]))
+                
+            for cat in parentCats:    
+                logging.info(cat)
+            
+            # Retirer les categories parentes de catList
+            for idx, cat in enumerate(catList):
+                if cat["id"] in parentCats:
+                    del catList[idx]               
+            
+            sortedList = sorted(catList, key=lambda k: k['name'])
+            
+            # OLD WAY OF WORKING.
+            # subcats = set([c.key.urlsafe() for c in ExpenseSubcategory.query()])
+            # cats = set([c.key.urlsafe() for c in ExpenseCategory.query()])
+            # parentCats = set([c.category.urlsafe() for c in ExpenseSubcategory.query()])  # Get a list of parents categories (without duplicates).
+            # catUrls = list(subcats.union(cats) - parentCats)
+            # catList = [{"id": usafe, "name" : ndb.Key(urlsafe=usafe).get().name} for usafe in catUrls]
+            # sortedList = sorted(catList, key=lambda k: k['name']) 
+            # END OF OLD WAY OF WORKING.
+            
+            # logging.info(sortedList)
+            
             template_values = {
                 'user': user.email().lower(),
                 'toBuyList': toBuyList,
-                'categoryList': cat
+                'subcategoryList': sortedList
             }
             
             if user.email().lower() in authorized_users:
@@ -455,8 +505,8 @@ class ToBuyAddPage(webapp2.RequestHandler):
                 toBuy = ToBuy(parent=expensebook_key(expensebook_name))
                 toBuy.object = newtoBuy
                 
-                cats = self.request.get_all('catValues')
-                toBuy.categories = [ndb.Key(urlsafe=cat) for cat in cats]
+                cat = self.request.get('catSelect')
+                toBuy.category = ndb.Key(urlsafe=cat)
                 
                 toBuy.enabled = True
                 
@@ -473,53 +523,74 @@ class ToBuyAddPage(webapp2.RequestHandler):
         
 class FeedData(webapp2.RequestHandler):
     def get(self):
-        self.response.write("Bonjour c'est dans la boite.")
-        
         arn = ndb.Key(urlsafe="aghkZXZ-Tm9uZXITCxIGUGVyc29uGICAgICAgKQIDA").get()
-        # steph = ndb.Key(urlsafe="agxzfmJhbmRwbW9uZXlyEwsSBlBlcnNvbhiAgICA692ICgw").get()
+        # # steph = ndb.Key(urlsafe="agxzfmJhbmRwbW9uZXlyEwsSBlBlcnNvbhiAgICA692ICgw").get()
         
         account = ndb.Key(urlsafe="aghkZXZ-Tm9uZXIYCxILQmFua0FjY291bnQYgICAgICAxAkM").get()
-        # BankAccount(owner = [arn.key,steph.key], name = "Tickets Restaurant", number = "", bank = "No Bank").put()
-        # BankAccount(owner = [arn.key], name = "Arn MasterCard", number = "123-456789-11", bank = "Belfius").put()
+        # # BankAccount(owner = [arn.key,steph.key], name = "Tickets Restaurant", number = "", bank = "No Bank").put()
+        # # BankAccount(owner = [arn.key], name = "Arn MasterCard", number = "123-456789-11", bank = "Belfius").put()
         
         cur = ndb.Key(urlsafe="aghkZXZ-Tm9uZXIVCxIIQ3VycmVuY3kYgICAgICAhAkM").get()
-        # Shop(name = "Brico").put()
-        # Shop(name = "Match").put()
-        # Shop(name = "Pharmacie").put()
-        # Shop(name = "Voltis").put()
-        # Shop(name = "Carodec").put()
-        # Shop(name = "Ikea").put()
-        # Shop(name = "Boucherie").put()
-        # Shop(name = "Boulangerie").put()
-        # Shop(name = "Colruyt").put()
-        # Shop(name = "Spar").put()
-        # shops = [s.render() for s in Shop.query().order(Shop.name)]
-        # logging.info("Shops: %s" % shops)
+        # # Shop(name = "Brico").put()
+        # # Shop(name = "Match").put()
+        # # Shop(name = "Pharmacie").put()
+        # # Shop(name = "Voltis").put()
+        # # Shop(name = "Carodec").put()
+        # # Shop(name = "Ikea").put()
+        # # Shop(name = "Boucherie").put()
+        # # Shop(name = "Boulangerie").put()
+        # # Shop(name = "Colruyt").put()
+        # # Shop(name = "Spar").put()
+        # # shops = [s.render() for s in Shop.query().order(Shop.name)]
+        # # logging.info("Shops: %s" % shops)
         
-        cat = ndb.Key(urlsafe="aghkZXZ-Tm9uZXIcCxIPRXhwZW5zZUNhdGVnb3J5GICAgICA1L4JDA").get()
-        # ExpenseCategory(category="Alimentation",subcategory="Fruits").put()
-        # ExpenseCategory(category="Alimentation",subcategory="Legumes").put()
-        # ExpenseCategory(category="Techs").put()
+        # # cat = ndb.Key(urlsafe="aghkZXZ-Tm9uZXIcCxIPRXhwZW5zZUNhdGVnb3J5GICAgICA1L4JDA").get()
+        # alim = ExpenseCategory(name="Alimentation").put()
+        # tech = ExpenseCategory(name="Techs").put()
+        # med = ExpenseCategory(name="Sante").put()
         
-        # cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.category)]
-        # for c in cat:
-            # logging.info("%s" % c)
+        # fruits = ExpenseSubcategory(name="Fruits", category=alim).put()
+        # legumes = ExpenseSubcategory(name="Legumes", category=alim).put()
         
-        # pers = [p.render() for p in Person.query().order(Person.firstName)]
-        # for p in pers:
-            # logging.info("%s %s %s %s" % (p["firstName"], p["lastName"], p["email"], p["surname"]))
+        # # cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.name)]
+        # # for c in cat:
+            # # logging.info("%s" % c)
         
-        # accounts = [a.render() for a in BankAccount.query().order(BankAccount.name)]
-        # for a in accounts:
-            # logging.info("%s %s %s" % (a["number"], a["bank"], a["owner"][0]["id"]))
-        pt = ndb.Key(urlsafe="aghkZXZ-Tm9uZXIZCxIMUGF5ZW1lbnRUeXBlGICAgICAgMQKDA").get()
-        Expense(parent = expensebook_key(), date=datetime.datetime.now(), object="fifi", comment="tidi", price=5.0, currency = cur.key, categories=[cat.key], account = account.key, buyers = [arn.key], beneficiaries = [arn.key], payType = pt.key,recordedBy = arn.key, recordedOn = datetime.datetime.now() ).put()
-       
+        # # pers = [p.render() for p in Person.query().order(Person.firstName)]
+        # # for p in pers:
+            # # logging.info("%s %s %s %s" % (p["firstName"], p["lastName"], p["email"], p["surname"]))
+        
+        # # accounts = [a.render() for a in BankAccount.query().order(BankAccount.name)]
+        # # for a in accounts:
+            # # logging.info("%s %s %s" % (a["number"], a["bank"], a["owner"][0]["id"]))
+        # pt = ndb.Key(urlsafe="aghkZXZ-Tm9uZXIZCxIMUGF5ZW1lbnRUeXBlGICAgICAgMQKDA").get()
+        # alim = ndb.Key(urlsafe="aghkZXZ-Tm9uZXIcCxIPRXhwZW5zZUNhdGVnb3J5GICAgICA1OkIDA")
+        # Expense(parent = expensebook_key(), date=datetime.datetime.now(), object="IPhone", comment="Light", price=33.0, currency = cur.key, categories=[alim], account = account.key, buyers = [arn.key], beneficiaries = [arn.key], payType = pt.key,recordedBy = arn.key, recordedOn = datetime.datetime.now() ).put()
+        fr = ndb.Key(urlsafe="aghkZXZ-Tm9uZXIcCxIPRXhwZW5zZUNhdGVnb3J5GICAgICA1JkKDA")
+        ToBuy(parent = expensebook_key(), object = "Fleurs", category = fr, enabled=True).put()
+        
+        # ExpenseCategory(name= "Santé", parentCategory=None).put()
+        # ExpenseCategory(name= "Maison", parentCategory=None).put()
+        # ExpenseCategory(name= "Techs", parentCategory=None).put()
+        # alim = ExpenseCategory(name= "Alimentation", parentCategory=None).put()
+        # ExpenseCategory(name= "Viande", parentCategory=alim).put()
+        # ExpenseCategory(name= "Poisson", parentCategory=alim).put()
+        # ExpenseCategory(name= "Cremerie", parentCategory=alim).put()
+        # ExpenseCategory(name= "Traiteur", parentCategory=alim).put()
+        # ExpenseCategory(name= "Boulangerie-Patisserie", parentCategory=alim).put()
+        # ExpenseCategory(name= "Epicerie salé", parentCategory=alim).put()
+        # ExpenseCategory(name= "Epicerie sucré", parentCategory=alim).put()
+        # ExpenseCategory(name= "Surgeles", parentCategory=alim).put()
+        # ExpenseCategory(name= "Vins et Bulles", parentCategory=alim).put()
+        # ExpenseCategory(name= "Alcool", parentCategory=alim).put()
+        # ExpenseCategory(name= "Boissons", parentCategory=alim).put()
+        
+        self.response.write("Bonjour c'est dans la boite.")
         pass
         
 app = webapp2.WSGIApplication([
     ('/list', ExpensesPage),
-    ('/feed', FeedData),
+    # ('/feed', FeedData),
     ('/', AddExpense),
     ('/balance', BalancePage),
     ('/remove', RemoveEntity),

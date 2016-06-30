@@ -44,7 +44,7 @@
             <thead>
                 <tr id="header">
                     <th>Object</th>
-                    <th data-priority="1">Categories</th>
+                    <th data-priority="1">Category</th>
                 </tr>
             </thead>
                        
@@ -53,7 +53,7 @@
                 {% if toBuy.enabled %}
                     <tr id="{{ toBuy.id }}">
                         <td class="object">{{ toBuy.object }}</td>
-                        <td class="cat">{{ toBuy.categories|join(', ',attribute="category") }}</td>
+                        <td class="cat">{{ toBuy.category.name }}</td>
                     </tr>
                 {% endif %}
             {% endfor %}
