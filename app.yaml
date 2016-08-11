@@ -8,6 +8,8 @@ handlers:
   static_dir: resources/
 - url: /.*
   script: Expenses.app
+- url: /remote_api/*
+  script: google.appengine.ext.remote_api.handler.application
   
 builtins:
 - remote_api: on
