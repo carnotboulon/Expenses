@@ -12,7 +12,7 @@ $(function() {
             $("#dateDesc").html($("#whenValue").val());
             $("#objectDesc").html($("#whatValue").val());
             $("#priceDesc").html($("#priceValue").val());
-            // $("#shopDesc").html($("#shopSelector label[for='shop-"+$('#shopSelector :checked').val()+"']").text());
+            $("#shopDesc").html($("#shopSelector label[for='shop-"+$('#shopSelector :checked').val()+"']").text());
             $("#accountDesc").html($("select[name='account'] :selected").text());
             
             $("#benefDesc").html("");
@@ -51,12 +51,12 @@ $(function() {
         }
   );
   //SHOP SELECTION. Add the selected option to the text input
-  // $("input:radio[name='shopValue']").click(
-        // function()
-        // {
-            // $("#filterShops").val($(this).siblings("label").text());
-        // }
-  // );
+  $("input:radio[name='shopValue']").click(
+        function()
+        {
+            $("#filterShops").val($(this).siblings("label").text());
+        }
+  );
   
   //Button to check all persons in the Person tab.
   
@@ -85,9 +85,9 @@ $(function() {
         if ($("#whenValue").val() == ""){
             msg += "Date, ";
         }
-        // if ($("input:radio[name='shopValue']:checked").length == 0){
-            // msg += "Shop, ";
-        // }
+        if ($("input:radio[name='shopValue']:checked").length == 0){
+            msg += "Shop, ";
+        }
         if ($("input:checkbox[name='benefsValue']:checked").length == 0){
             msg += "Beneficiaries, ";
         }       

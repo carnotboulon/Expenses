@@ -48,6 +48,7 @@
             <thead>
                 <tr>
                     <th data-priority="3">Date</th>
+                    <th data-priority="5">Shop</th>
                     <th data-priority="5">Category</th>
                     <th>What?</th>
                     <th data-priority="1">Price</th>
@@ -63,6 +64,7 @@
             {% for expense in expenses %}
                 <tr id="{{ expense.id }}">
                     <td class="date">{{ expense.date.strftime('%d %b %y') }}</td>
+                    <td class="shop">{{ expense.shop.name }}</td>
                     <td class="cat">{{ expense.categories|join(', ',attribute="name") }}</td>
                     <td class="object">{{ expense.object }}</td>
                     <td class="price">{{ expense.price }}</td>
