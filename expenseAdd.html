@@ -21,11 +21,10 @@
         <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Add Expense</h1>
             <a href="/list" data-icon="delete" class="ui-btn-right">Menu</a>
-            <div data-role="navbar" data-position="fixed" data-grid="d">
+            <div data-role="navbar" data-position="fixed" data-grid="c">
                 <ul>
                     <li><a href="#what" class="ui-btn-active">What</a></li>
                     <li><a href="#when">When</a></li>
-                    <li><a href="#where">Where</a></li>
                     <li><a href="#who">Who</a></li>
                     <li><a href="#save">Save</a></li>
                 </ul>
@@ -46,7 +45,10 @@
                     <li><a class="autocomplete" href="#">{{ obj }}</a></li>
                 {% endfor %}
             </ul>
-            
+            <fieldset>
+                <label for="commentValue">Comment</label>
+                <input name="commentValue" id="commentValue" placeholder="Comment..." />
+            </fieldset>
             <fieldset>
                 <label for="number-pattern">Price</label>
                 <input type="number" name="priceValue" step="0.01" min="0" id="priceValue" value="" />
@@ -76,12 +78,11 @@
         
         <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Add Expense</h1>
-            <a href="/" data-icon="delete" class="ui-btn-right">Cancel</a>
-            <div data-role="navbar" data-position="fixed" data-grid="d">
+            <a href="/" data-icon="delete" class="ui-btn-right">Menu</a>
+            <div data-role="navbar" data-position="fixed" data-grid="c">
                 <ul>
                     <li><a href="#what">What</a></li>
                     <li><a href="#when" class="ui-btn-active">When</a></li>
-                    <li><a href="#where">Where</a></li>
                     <li><a href="#who">Who</a></li>
                     <li><a href="#save">Save</a></li>
                 </ul>
@@ -107,58 +108,17 @@
         </div><!-- /footer -->
         
     </div><!-- /page -->
-
-
-    <!-- Start of second page -->
-    <div data-role="page" id="where" >
-        
-        <div data-role="header" data-position="fixed" data-theme="a">
-            <h1>Add Expense</h1>
-            <a href="/" data-icon="delete" class="ui-btn-right">Cancel</a>
-            <div data-role="navbar" data-position="fixed" data-grid="d">
-                <ul>
-                    <li><a href="#what">What</a></li>
-                    <li><a href="#when">When</a></li>
-                    <li><a href="#where"  class="ui-btn-active">Where</a></li>
-                    <li><a href="#who">Who</a></li>
-                    <li><a href="#save">Save</a></li>
-                </ul>
-            </div><!-- /navbar -->
-        </div><!-- /header -->
-        
-        <div data-role="content">	
-            <legend>Where did you buy it?</legend>
-                
-            <fieldset>
-                <input type="text" data-type="search" id="filterShops">
-            </fieldset>
-            <fieldset data-role="controlgroup" id="shopSelector" data-filter="true" data-filter-reveal="true" data-input="#filterShops">
-                <!-- <input type="radio" name="shop" id="shop-1" value="1" checked="checked"/>
-                <label for="shop-1">test</label>  -->
-                {% for shop in shopList %}
-                    <input type="radio" name="shopValue" id="shop-{{shop.id}}" value="{{ shop.id }}" />
-                    <label for="shop-{{shop.id}}">{{ shop.name }}</label>      
-                {% endfor %}
-                </fieldset>
-        </div><!-- /content -->
-        
-        <div data-role="footer" data-position="fixed" data-theme="a">
-            <h4>B&amp;P</h4>
-        </div><!-- /footer -->
-        
-    </div><!-- /page -->
     
     <!-- Start of second page -->
     <div data-role="page" id="who">
         
         <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Add Expense</h1>
-            <a href="/" data-icon="delete" class="ui-btn-right">Cancel</a>
-            <div data-role="navbar" data-position="fixed" data-grid="d">
+            <a href="/" data-icon="delete" class="ui-btn-right">Menu</a>
+            <div data-role="navbar" data-position="fixed" data-grid="c">
                 <ul>
                     <li><a href="#what">What</a></li>
                     <li><a href="#when">When</a></li>
-                    <li><a href="#where">Where</a></li>
                     <li><a href="#who" class="ui-btn-active">Who</a></li>
                     <li><a href="#save">Save</a></li>
                 </ul>
@@ -208,12 +168,11 @@
         
         <div data-role="header" data-position="fixed" data-theme="a">
             <h1>Add Expense</h1>
-            <a href="/" data-icon="delete" class="ui-btn-right">Cancel</a>
-            <div data-role="navbar" data-position="fixed" data-grid="d">
+            <a href="/" data-icon="delete" class="ui-btn-right">Menu</a>
+            <div data-role="navbar" data-position="fixed" data-grid="c">
                 <ul>
                     <li><a href="#what">What</a></li>
                     <li><a href="#when">When</a></li>
-                    <li><a href="#where">Where</a></li>
                     <li><a href="#who">Who</a></li>
                     <li><a href="#save" class="ui-btn-active">Save</a></li>
                 </ul>

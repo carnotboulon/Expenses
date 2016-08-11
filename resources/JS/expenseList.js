@@ -1,9 +1,8 @@
 $(document).on("pagecreate", "#expenseSummary", function(){
-    $("#expenseSummary .ui-checkbox label")[2].click();
-    $("#expenseSummary .ui-checkbox label")[5].click();
-    $("#expenseSummary .ui-checkbox label")[6].click();
-    $("#expenseSummary .ui-checkbox label")[7].click();
-    $("#expenseSummary .ui-checkbox label")[8].click();
+    $("#expenseSummary .ui-checkbox label")[1].click();     //Category
+    $("#expenseSummary .ui-checkbox label")[5].click();     //Paid with
+    $("#expenseSummary .ui-checkbox label")[6].click();     //Recorded By
+    $("#expenseSummary .ui-checkbox label")[7].click();     //Recorded On
 });
 
 $(function() {
