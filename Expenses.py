@@ -408,7 +408,6 @@ class ToBuyPage(webapp2.RequestHandler):
                 template = JINJA_ENVIRONMENT.get_template('unauthorized.html')
                 self.response.write(template.render({"email":user.email().lower()}))
     
-
 class ToBuyAddPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
@@ -469,6 +468,39 @@ class ToBuyAddPage(webapp2.RequestHandler):
             else:
                 template = JINJA_ENVIRONMENT.get_template('unauthorized.html')
                 self.response.write(template.render({"email":user.email().lower()}))
+
+class downloadCSV(webapp2.RequestHandler):
+    def get(self):
+        # Get all expenses.
+        expenses_query = Expense.query(ancestor=expensebook_key("BandP")).order(-Expense.date)
+        expenses = expenses_query.fetch()
+        expList = []
+        # Go through expenses and store them in a dict. 
+        # Possible improvement: could be done via render function.
+        for exp in expenses:
+            expItem = {}
+            expItem["date"] = exp.date.__str__()
+            expItem["object"] = exp.object
+            expItem["price"] = exp.price
+            expItem["shop"] = exp.shop.get().name
+            expItem["categories"] = [e.get().name for e in exp.categories]
+            expItem["account"] = exp.account.get().name
+            expItem["buyers"] = [e.get().email for e in exp.buyers]
+            expItem["beneficiaries"] = [e.get().email for e in exp.beneficiaries]
+            expItem["payType"] = exp.payType.get().type
+            expList.append(expItem)
+        
+        # Generates the file content (header + expenses).
+        fileContent = ""
+        fileContent += "Date; Object; Price; Shop; Categories; Account; Buyers; Beneficiaries; PayType;\n"
+        for exp in expList:
+            extStr = "%s ; %s ; %s ; %s ; %s ; %s ; %s ; %s ; %s ;\n" % (exp["date"],exp["object"],exp["price"],exp["shop"], ",".join(exp["categories"]), exp["account"], exp["payType"], ",".join(exp["buyers"]), ",".join(exp["beneficiaries"])) 
+            fileContent += extStr.encode("utf-8")
+        
+        self.response.headers['Content-Type'] = 'text/csv'
+        self.response.headers['Content-Disposition'] = "attachment; filename=ExportDB-%s.csv" % time.strftime("%d%b%y")
+        self.response.out.write(fileContent)
+        
         
 class FeedData(webapp2.RequestHandler):
     def get(self):
@@ -516,6 +548,7 @@ app = webapp2.WSGIApplication([
     ('/disable', DisableEntity),
     ('/toBuy', ToBuyPage),
     ('/toBuyAdd', ToBuyAddPage),
+    ('/downloadcsv', downloadCSV),
     
     
 ], debug=True)
