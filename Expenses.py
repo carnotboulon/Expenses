@@ -494,7 +494,7 @@ class downloadCSV(webapp2.RequestHandler):
         fileContent = ""
         fileContent += "Date; Object; Price; Shop; Categories; Account; PayType; Buyers; Beneficiaries; \n"
         for exp in expList:
-            extStr = "%s ; %s ; %s ; %s ; %s ; %s ; %s ; %s ; %s ;\n" % (exp["date"],exp["object"],exp["price"],exp["shop"], ",".join(exp["categories"]), exp["account"], exp["payType"], ",".join(exp["buyers"]), ",".join(exp["beneficiaries"])) 
+            extStr = "%s ; %s ; %s ; %s ; %s ; %s ; %s ; %s ; %s ;\n" % (exp["date"],exp["object"],("%.2f" % exp["price"]).replace(".",","),exp["shop"], ",".join(exp["categories"]), exp["account"], exp["payType"], ",".join(exp["buyers"]), ",".join(exp["beneficiaries"])) 
             fileContent += extStr.encode("utf-8")
         
         self.response.headers['Content-Type'] = 'text/csv'
