@@ -492,7 +492,7 @@ class downloadCSV(webapp2.RequestHandler):
         
         # Generates the file content (header + expenses).
         fileContent = ""
-        fileContent += "Date; Object; Price; Shop; Categories; Account; Buyers; Beneficiaries; PayType;\n"
+        fileContent += "Date; Object; Price; Shop; Categories; Account; PayType; Buyers; Beneficiaries; \n"
         for exp in expList:
             extStr = "%s ; %s ; %s ; %s ; %s ; %s ; %s ; %s ; %s ;\n" % (exp["date"],exp["object"],exp["price"],exp["shop"], ",".join(exp["categories"]), exp["account"], exp["payType"], ",".join(exp["buyers"]), ",".join(exp["beneficiaries"])) 
             fileContent += extStr.encode("utf-8")
