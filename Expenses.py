@@ -320,8 +320,18 @@ class AddExpense(webapp2.RequestHandler):
             # logging.info("User: %s" % user.email())
             # logging.info("Expense Book Key: %s" % expensebook_key(expensebook_name))
             
-            expense = Expense(parent=expensebook_key(expensebook_name))
+            # if field expenseID is empty, user tries to create a new expense.
+            if not self.request.get('expenseID'):
+                expense = Expense(parent=expensebook_key(expensebook_name))
             
+            # if field expenseID is not empty, user tries to edit an existing expense.
+            else:
+                # Try to get the key with the url safe ID.
+                expense = ndb.Key(urlsafe=self.request.get('expenseID')).get()
+                # If couldn't find the expense...create a new one.
+                if not expense:
+                    expense = Expense(parent=expensebook_key(expensebook_name))
+                
             # logging.info("Date: %s" % self.request.get('whenValue'))
             expense.date = datetime.datetime.strptime(self.request.get('whenValue'), '%Y-%m-%d')   
             
