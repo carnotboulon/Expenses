@@ -196,7 +196,7 @@ class ExpensesPage(webapp2.RequestHandler):
         else:
             expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
             expenses_query = Expense.query(ancestor=expensebook_key(expensebook_name)).order(-Expense.date)
-            expenses = expenses_query.fetch()
+            expenses = expenses_query.fetch(limit=10)
             expenseList = []
             for exp in expenses:
                 expenseList.append(exp.render())
