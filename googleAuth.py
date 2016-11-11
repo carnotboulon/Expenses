@@ -28,9 +28,9 @@ class SessionGoogle:
         return my_dict
         
         
-url_login = "https://accounts.google.com/ServiceLogin"
-url_auth = "https://accounts.google.com/ServiceLoginAuth"
-session = googleAuth.SessionGoogle(url_login, url_auth, "myGoogleLogin", "myPassword")
+# url_login = "https://accounts.google.com/ServiceLogin"
+# url_auth = "https://accounts.google.com/ServiceLoginAuth"
+# session = googleAuth.SessionGoogle(url_login, url_auth, "myGoogleLogin", "myPassword")
 # f = open("testGoogle.html","w")
 # f.write(session.get("http://bandpmoney.appspot.com").encode("utf-8"))
 # f.close()
