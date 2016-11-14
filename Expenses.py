@@ -500,8 +500,7 @@ class downloadCSV(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'text/csv'
         self.response.headers['Content-Disposition'] = "attachment; filename=ExportDB-%s.csv" % time.strftime("%d%b%y")
         self.response.out.write(fileContent)
-        
-        
+              
 class FeedData(webapp2.RequestHandler):
     def get(self):
         self.response.write("Bonjour c'est dans la boite.")
