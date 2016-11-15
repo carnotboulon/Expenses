@@ -6,6 +6,13 @@ import bleach
 import datetime
 import string
 
+# import os
+# os.chdir(r"D:\Arnaud\Github\Expenses")
+# import googleAuth
+# b = googleAuth.CSVSaver(email,pwd,csvFileName,delimiter)
+# b.saveExpenses()
+
+
 class SessionGoogle:
     
     url = "http://bandpmoney.appspot.com"
@@ -123,7 +130,7 @@ class SessionGoogle:
             "benefsValue": benefsKeys,
             "payTypeValue": payTypeKey,
         }
-        print myData
+        # print myData
         return self.ses.post(self.url, myData)
         
     def _getCategories(self):
@@ -165,13 +172,40 @@ class SessionGoogle:
             if type(p) != bs.Comment:
                 self.payTypes[string.lower(p.text)] = p.attrs[0][1]
         return self.payTypes
-    
-    
-    
-# session = googleAuth.SessionGoogle()
-# f = open("testGoogle.html","w")
-# f.write(session.get("http://bandpmoney.appspot.com").encode("utf-8"))
-# f.close()
 
-# myData = {'whatValue': 'Bonjour', 'accountValue': 'agxzfmJhbmRwbW9uZXlyGAsSC0JhbmtBY2NvdW50GICAgMDIxYwKDA', 'catValues': ['agxzfmJhbmRwbW9uZXlyHAsSD0V4cGVuc2VDYXRlZ29yeRiAgICA-O2dCgw', 'agxzfmJhbmRwbW9uZXlyHAsSD0V4cGVuc2VDYXRlZ29yeRiAgICAgOSRCgw'], 'payTypeValue': 'agxzfmJhbmRwbW9uZXlyGQsSDFBheWVtZW50VHlwZRiAgICAhKCTCgw', 'whenValue': '2016-11-12', 'benefsValue': ['agxzfmJhbmRwbW9uZXlyEwsSBlBlcnNvbhiAgICAnZSHCgw', 'agxzfmJhbmRwbW9uZXlyEwsSBlBlcnNvbhiAgICA692ICgw'], 'priceValue': '6.5', 'shopValue': 'agxzfmJhbmRwbW9uZXlyEQsSBFNob3AYgICAgK-rlQoM'}
-# sg.ses.post("http://bandpmoney.appspot.com",data=myData)
+        
+import csv
+
+class CSVSaver:
+    def __init__(self, email, mdp, filename, delimiter):
+        self.filename = filename
+        self.rawExpenses = []
+        reader = csv.DictReader(open(self.filename),delimiter=delimiter)
+        for exp in reader:
+            self.rawExpenses.append(exp)
+        self.cleanExpenses()
+        self.ses = SessionGoogle(email, mdp)
+        self.saveExpenses()
+        
+    # Takes care of the lists in the raw data (categories and benefs).
+    def cleanExpenses(self):
+        self.expenses = self.rawExpenses
+        for exp in self.expenses:
+            exp["cats"] = exp["cats"].split(",")
+            exp["benefs"] = exp["benefs"].split(",")
+    
+    # Saves all the expenses stored in the CSV file on the website.
+    def saveExpenses(self):
+        count = 0
+        for idx,exp in enumerate(self.expenses):
+            response = self.ses.saveExpense(exp["what"], exp["when"], exp["price"], exp["cats"], exp["shop"], exp["account"], exp["benefs"], exp["payType"])
+            if response.status_code == 200:
+                count += 1
+                print "Expense #%d saved." % (idx+1)
+            else:
+                print "Problem with expense line %d" % (idx+1)
+        if len(self.expenses) == count:
+            print "All Expenses saved succesfully."
+        else:
+            print "%s expenses on % were saved succesfully." % (count, len(self.expenses))   
+    
