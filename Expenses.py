@@ -1,3 +1,4 @@
+# coding: latin-1
 # [START imports]
 from google.appengine.api import users
 from google.appengine.ext import ndb
@@ -15,6 +16,7 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 # [END imports]
 
 DEFAULT_EXPENSEBOOK_NAME = 'BandP'
+DATE_FORMAT = "%d %B, %Y"
 
 
 # We set a parent key on the 'Greetings' to ensure that they are all
@@ -125,8 +127,9 @@ class Expense(RenderModel):
     object = ndb.StringProperty(indexed = True, required = True)
     price = ndb.FloatProperty(indexed = True, required = True)
     currency = ndb.KeyProperty(kind='Currency', required = True)
+    comment = ndb.StringProperty(indexed = False, required = False)
 
-    shop = ndb.KeyProperty(kind='Shop', indexed = True, required = True)
+    # shop = ndb.KeyProperty(kind='Shop', indexed = True, required = True)
     categories = ndb.KeyProperty(kind='ExpenseCategory', indexed = True, repeated = True)
     account = ndb.KeyProperty(kind='BankAccount', indexed = True, required = True)
 
@@ -209,11 +212,11 @@ class ExpensesPage(webapp2.RequestHandler):
             
             template_values = {
                 'expenses': expenseList,
-                'shopList': "",
-                'categoryList': "",
-                'personList': "",
-                'accountList': "",
-                'typeList':""
+                # 'shopList': "",
+                # 'categoryList': "",
+                # 'personList': "",
+                # 'accountList': "",
+                # 'typeList':""
             }
             
             if user.email().lower() in authorized_users:
@@ -268,41 +271,87 @@ class AddExpense(webapp2.RequestHandler):
             # Get data.
             expensebook_name = self.request.get('expensebook_name', DEFAULT_EXPENSEBOOK_NAME)
             
-            objects = list(set([e.render()["object"] for e in Expense.query().order(Expense.object)]))
-            # logging.info("Objects: %s" % objects)
+            # Get data lists
+            # allCats = [(c.render(),0) for c in ExpenseCategory.query().order(ExpenseCategory.name)]
             
-            shops = [s.render() for s in Shop.query().order(Shop.name)]
-            # logging.info("Shops: %s" % shops)
+            # Store all categories in a dict with key = category name, value = catgory dict.
+            allCats = {}
+            for c in ExpenseCategory.query().order(ExpenseCategory.name):
+                cat = c.render()
+                cat["selected"] = 0
+                allCats[cat["name"]] = cat
             
-            # cur = [c.render() for c in Currency.query().order(Currency.name)]
-            # logging.info("Currencies: %s" % cur)
+            # Store all persons in a dict with key = person email, value = person dict.
+            allPers = {}
+            for p in Person.query().order(Person.firstName):
+                pers = p.render()
+                pers["selected"] = 0
+                allPers[pers["email"]] = pers
             
-            cat = [c.render() for c in ExpenseCategory.query().order(ExpenseCategory.name)]
-            # logging.info("Cats: %s" % cat)
+            # Store all accounts in a dict with key = account name, value = account dict.
+            allAccounts = {}
+            for a in BankAccount.query().order(BankAccount.name):
+                bank = a.render()
+                bank["selected"] = 0
+                allAccounts[bank["name"]] = bank
             
-            pers = [p.render() for p in Person.query().order(Person.firstName)]
-            # logging.info("Persons: %s" % pers)
-            
-            accounts = [a.render() for a in BankAccount.query().order(BankAccount.name)]
-            # logging.info("Accounts: %s" % accounts)
-            
-            payTypes = [t.render() for t in PayementType.query().order(PayementType.type)]
-            
-            today = datetime.date.today().strftime("%Y-%m-%d")
-            
+            # Store all pay types in a dict with key = payType type, value = payType dict.
+            allPayTypes = {}
+            for p in PayementType.query().order(PayementType.type):
+                pt = p.render()
+                pt["selected"] = 0
+                allPayTypes[pt["type"]] = pt
+
             user = users.get_current_user()
             
+            # If expId, specified, get back expense and its values. 
+            try:
+                expense = ndb.Key(urlsafe=self.request.get("expId")).get().render();
+            # Expense could not be found. Initialize fields with empty values.
+            except:
+                object = ""
+                comment = ""
+                date = (datetime.date.today() + datetime.timedelta(days=0)).strftime(DATE_FORMAT)
+                price = ""
+            # Expense has been found. Initialize fields with expense values.
+            else:
+                object = expense["object"]
+                comment = expense["comment"]
+                date = expense["date"]
+                price = expense["price"]
+                
+                for cat in expense["categories"]:
+                    if cat["name"] in allCats.keys():
+                        allCats[cat["name"]]["selected"] = 1
+                logging.info(allCats)
+                
+                for pers in expense["beneficiaries"]:
+                    if pers["email"] in allPers.keys():
+                        allPers[pers["email"]]["selected"] = 1
+                logging.info(allPers)
+                
+                if expense["account"]["name"] in allAccounts.keys():
+                        allAccounts[expense["account"]["name"]]["selected"] = 1
+                logging.info(allAccounts)
+                
+                if expense["payType"]["type"] in allPayTypes.keys():
+                        allPayTypes[expense["payType"]["type"]]["selected"] = 1
+                logging.info(allPayTypes)
+            
+            # TODO: Modifier le template pour sélectionner la catégorie/personne/compte/type si "selected" = 1.
             template_values = {
                 'user': user.email().lower(),
-                'expList': objects,
-                'shopList': shops,
-                'categoryList': cat,
-                'personList': pers,
-                'accountList': accounts,
-                'typeList': payTypes,
-                'today': today,
-                'payTypes': payTypes
+                'object': object,
+                'categoryList': allCats,
+                'comment': comment,
+                'date': date,
+                'price': price,
+                'personList': allPers,
+                'accountList': allAccounts,
+                'payTypes': allPayTypes,
+                'expId':self.request.get("expId")
             }
+            # logging.info(template_values)
             if user.email().lower() in authorized_users:
                 template = JINJA_ENVIRONMENT.get_template('expenseAdd.html')
                 self.response.write(template.render(template_values))
@@ -320,45 +369,76 @@ class AddExpense(webapp2.RequestHandler):
             # logging.info("User: %s" % user.email())
             # logging.info("Expense Book Key: %s" % expensebook_key(expensebook_name))
             
-            expense = Expense(parent=expensebook_key(expensebook_name))
+            # Try to retrieve expense.
+            try:
+                expense = ndb.Key(urlsafe=self.request.get("expId"))
+            except:
+                expense = Expense(parent=expensebook_key(expensebook_name))
             
-            # logging.info("Date: %s" % self.request.get('whenValue'))
-            expense.date = datetime.datetime.strptime(self.request.get('whenValue'), '%Y-%m-%d')   
+            logging.info("Date: %s" % self.request.get('date'))
+            expense.date = datetime.datetime.strptime(self.request.get('date'), DATE_FORMAT)   
             
-            # logging.info("Object: %s" % self.request.get('whatValue'))
-            expense.object = self.request.get('whatValue')
+            logging.info("Object: %s" % self.request.get('expense'))
+            expense.object = self.request.get('expense').capitalize()
+            expense.comment = self.request.get('comment').capitalize()
             
-            # logging.info("Price: %s" % self.request.get('priceValue'))
-            expense.price = float(self.request.get('priceValue'))
+            logging.info("Price: %s" % self.request.get('price'))
+            expense.price = float(self.request.get('price'))
             expense.currency = Currency.query(Currency.code == "EUR").get().key
             
-            # logging.info("Shop: %s" % self.request.get_all('shopValue'))
-            expense.shop = ndb.Key(urlsafe=self.request.get_all('shopValue')[0])
-            #expense.shop = Shop.query(Shop.name == self.request.get('shop')).get().key
+            # logging.info("Shop: %s" % self.request.get('shop'))
+            # expense.shop = ndb.Key(urlsafe=self.request.get('shop'))
+                
+            logging.info("Categories: %s" % self.request.get_all('categories'))
+            cats = self.request.get_all('categories')
             
-            # logging.info("Categories: %s" % self.request.get_all('catValues'))
-            cats = self.request.get_all('catValues')
-            expense.categories = [ndb.Key(urlsafe=cat) for cat in cats]
+            for cat in cats:
+                try:
+                    expense.categories.append(ndb.Key(urlsafe=cat))
+                except:
+                    pass
             
-            # logging.info("Account: %s" % self.request.get_all('accountValue'))
-            account = ndb.Key(urlsafe=self.request.get_all('accountValue')[0])
-            expense.account = account
-            expense.buyers = account.get().owner
+            logging.info("Account: %s" % self.request.get('account'))
+            try:
+                account = ndb.Key(urlsafe=self.request.get('account'))
+                expense.account = account
+                expense.buyers = account.get().owner
+            except:
+                pass
             
-            # logging.info("Benefs: %s" % self.request.get_all('benefsValue'))
-            benefs = self.request.get_all('benefsValue')
+            logging.info("Benefs: %s" % self.request.get_all('benefs'))
+            logging.info("URL: %s" % self.request.query_string)
+            
+            benefs = self.request.get_all('benefs')
+            logging.info(self.request.get("benefs"))
+            
+            # Get_all renvoie tous les parametres GET & POST, il y a donc les url_safe des valeurs (voulu)
+            # mais aussi le parametre avec sa valeur en clair venant de l'URL. Il faut donc parcourir la liste renvoyée par get_all 
+            # et supprimer les valeurs qui sont aussi dans l'URL pour éviter les valeurs en clair.
+            if "0" in benefs:
+                logging.info("All Benefs!")
+                persons = Person.query().fetch()
+                logging.info(persons)
+                benefs = [p.key.urlsafe() for p in persons]
+                
+            logging.info(benefs)
             # benefObjects = [Person.query(ndb.AND(Person.firstName == b.split()[0], Person.lastName == b.split()[1])) for b in benefs]
             # benefKeys = [pers.get().key for pers in benefObjects]
-            expense.beneficiaries = [ndb.Key(urlsafe=pers) for pers in benefs]
-            
-            expense.payType = ndb.Key(urlsafe=self.request.get('payTypeValue'))
-            #expense.payType = PayementType.query(PayementType.type == self.request.get('payType')).get().key
+            for pers in benefs:
+                try:
+                    expense.beneficiaries.append(ndb.Key(urlsafe=pers))
+                except:
+                    pass
+
+            expense.payType = ndb.Key(urlsafe=self.request.get('payType'))
             
             expense.recordedOn = datetime.datetime.now()
             logging.info(datetime.datetime.now())
             
             logging.info("User: %s", user.email())
             expense.recordedBy = Person.query(Person.email == user.email().lower()).get().key
+            
+            logging.info(expense.render())
             
             if user.email().lower() in authorized_users:
                 # logging.info("Expense: %s" % expense.render())
@@ -502,11 +582,40 @@ class downloadCSV(webapp2.RequestHandler):
         self.response.out.write(fileContent)
               
 class FeedData(webapp2.RequestHandler):
-    def get(self):
-        self.response.write("Bonjour c'est dans la boite.")
+    def get(self):    
+        # arn = Person(firstName="Arnaud",lastName="Boland",surname="Arn",email="arnaudboland@gmail.com").put()
+        # steph = Person(firstName="Stephanie",lastName="Thys",surname="Steph",email="stephanie.thys@gmail.com").put()
         
-        # arn = ndb.Key(urlsafe="agxzfmJhbmRwbW9uZXlyEwsSBlBlcnNvbhiAgICAnZSHCgw").get()
-        # steph = ndb.Key(urlsafe="agxzfmJhbmRwbW9uZXlyEwsSBlBlcnNvbhiAgICA692ICgw").get()
+        # arn = ndb.Key(urlsafe="aghkZXZ-Tm9uZXITCxIGUGVyc29uGICAgICA4JcKDA").get()
+        # steph = ndb.Key(urlsafe="aghkZXZ-Tm9uZXITCxIGUGVyc29uGICAgICA4JcJDA").get()
+        
+        # BankAccount(owner = [arn.key,steph.key], name = "Tickets Restaurant", number = "", bank = "No Bank").put()
+        # BankAccount(owner = [arn.key], name = "Arn MasterCard", number = "123-456789-11", bank = "Belfius").put()
+        # BankAccount(owner = [steph.key], name = "Steph Courant", number = "123-456789-11", bank = "BNP").put()
+        
+        # Shop(name = u"Bricolage").put()
+        # Shop(name = u"Supermarché").put()
+        # Shop(name = u"Pharmacie").put()
+        # Shop(name = u"Boulangerie").put()
+        # Shop(name = u"Epicerie").put()
+        # Shop(name = u"Boucherie").put()
+        # Shop(name = u"Restaurant").put()
+        # Shop(name = u"Autre").put()
+        
+        # ExpenseCategory(name = "Autre").put()
+        # ExpenseCategory(name = "Alimentation").put()
+        # ExpenseCategory(name = "Cadeau").put()
+        # ExpenseCategory(name = "Loisir").put()
+        # ExpenseCategory(name = "Santé").put()
+        
+        # PayementType(type = "Cash").put()
+        # PayementType(type = "Maestro").put()
+        # PayementType(type = "MasterCard").put()
+        # PayementType(type = "Visa").put()
+        
+        # Currency(name = "Euro", code = "EUR").put()
+        
+      
         
         # BankAccount(owner = [arn.key,steph.key], name = "Tickets Restaurant", number = "", bank = "No Bank").put()
         # BankAccount(owner = [arn.key], name = "Arn MasterCard", number = "123-456789-11", bank = "Belfius").put()
@@ -535,13 +644,14 @@ class FeedData(webapp2.RequestHandler):
         # accounts = [a.render() for a in BankAccount.query().order(BankAccount.name)]
         # for a in accounts:
             # logging.info("%s %s %s" % (a["number"], a["bank"], a["owner"][0]["id"]))
-        
+        self.response.write("Bonjour c'est dans la boite.")
         
         
 app = webapp2.WSGIApplication([
     ('/list', ExpensesPage),
     # ('/feed', FeedData),
     ('/', AddExpense),
+    ('/add', AddExpense),
     ('/balance', BalancePage),
     ('/remove', RemoveEntity),
     ('/disable', DisableEntity),

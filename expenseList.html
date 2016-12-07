@@ -1,90 +1,116 @@
 <!DOCTYPE html> 
 <html> 
 <head> 
-	<title>Add expense</title> 	
+	<title>Expenses</title> 	
     <meta name="viewport" content="width=device-width, initial-scale=1"> 
     
-    <link rel="stylesheet" href="./resources/css/expenseList.css" />
-    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <!--<link rel="stylesheet" href="./resources/css/expenseList.css" />-->
+    <!--<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />-->
     
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Mateialize Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    
+    <!--
     <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <script src="./resources/JS/jqueryFinger.js"></script>
     <script src="./resources/JS/expenseList.js"></script>
+    -->
 </head> 
 
 <body>
-<!-- Start of first page -->
-    <div data-role="page" id="expenseSummary">
-        
-        <div data-role="header" data-position="fixed" data-theme="a">
-            <h1>Expenses</h1>
-            <div data-role="navbar" data-position="fixed">
-                <ul>
-                    <li><a href="/list" rel="external" class="ui-btn-active">Summary</a></li>
-                    <li><a href="/balance" rel="external">Balance</a></li>
-                    <li><a href="/" rel="external">Add</a></li>
-                </ul>
-            </div><!-- /navbar -->
-        </div><!-- /header -->
-        
-        <div data-role="content">
-            <div data-role="popup" id="popupDialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
-                <div data-role="header" data-theme="a">
-                <h1>Delete Expense?</h1>
-                </div>
-                <div role="main" style="text-align:center" class="ui-content">
-                    <h3 class="ui-title">Are you sure you want to delete</h3>
-                    <h3 id="delExpense">expense</h3>
-                    
-                    <p>This action cannot be undone.</p>
-                    <a href="#" id="cancelBtn" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b" data-rel="back">Cancel</a>
-                    <a href="/" id="deleteBtn" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b" data-rel="back" data-transition="flow">Delete</a>
-                </div>
 
-            </div>
 
-            <table data-role="table" id="table-column-toggle" data-mode="columntoggle" class="ui-responsive table-stripe ui-body-d ui-shadow">
-            <thead>
-                <tr>
-                    <th data-priority="3">Date</th>
-                    <th data-priority="5">Shop</th>
-                    <th data-priority="5">Category</th>
-                    <th>What?</th>
-                    <th data-priority="1">Price</th>
-                    <th data-priority="2">Bought by?</th>
-                    <th data-priority="3">Bought for?</th>
-                    <th data-priority="4">Paid with?</th>
-                    <th data-priority="6">Recorded By</th>
-                    <th data-priority="6">Recorded On</th>
-                </tr>
-            </thead>
-                       
-            <tbody>
-            {% for expense in expenses %}
-                <tr id="{{ expense.id }}">
-                    <td class="date">{{ expense.date.strftime('%d %b %y') }}</td>
-                    <td class="shop">{{ expense.shop.name }}</td>
-                    <td class="cat">{{ expense.categories|join(', ',attribute="name") }}</td>
-                    <td class="object">{{ expense.object }}</td>
-                    <td class="price">{{ expense.price }}</td>
-                    <td class="buyers">{{ expense.buyers|join(', ',attribute="firstName") }} </td>
-                    <td class="benefs">{{ expense.beneficiaries|join(', ',attribute="firstName") }} </td>
-                    <td class="account">{{ expense.account.name }}</td>
-                    <td class="recordedBy">{{ expense.recordedBy.firstName }}</td>
-                    <td class="recordedOn">{{ expense.recordedOn.strftime('%d %b %y %H:%M') }}</td>
-                </tr>
-                 
-            {% endfor %}
-            </tbody>
-            </table>
-        </div>
+<nav>
+    <div class="nav-wrapper">
+      <a href="#!" class="brand-logo">&nbsp&nbsp&nbsp B&P Expenses</a>
+      <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+      <ul class="right hide-on-med-and-down">
+        <li class="active"><a href="./list">List</a></li>
+        <li><a href="./">Balance</a></li>
+        <li><a href="./downloadcsv"><i class="material-icons">file_download</i></a></li>
         
-        <div data-role="footer" data-position="fixed" data-theme="a">
-            <h4>B&amp;P</h4>
-        </div><!-- /footer -->
-        
-</div><!-- /page -->    
+      </ul>
+      <ul class="side-nav" id="mobile-demo">
+        <li class="active"><a href="./list">List</a></li>
+        <li><a href="./">Balance</a></li>
+        <li><a href="./downloadcsv">Download</a></li>
+      </ul>
+    </div>
+</nav>
+<div class="container">  
     
+    <ul class="collection">
+        {% for expense in expenses %}
+            <li class="collection-item avatar" onclick="$('#modal{{loop.index}}').modal('open');">
+                
+                {% if expense.nb_buyers > 1 %}
+                    <img src="resources/Pictures/iconMulti.png" alt="" class="circle">
+                {% else %}
+                    <img src="resources/Pictures/icon{% for buyer in expense.buyers %}{{ buyer.firstName[0] }}{% endfor %}.png" alt="" class="circle">
+                {% endif %}
+                
+                <span class="title">{{expense.object}}</span>, {{expense.comment}}.
+                </label>
+                <p>
+                    <b>{{expense.price}} &euro;</b>
+                    
+                </p>
+                
+                {% for cat in expense.categories %}
+                    <span class="badge teal white-text">{{ cat.name }}</span>
+                {% endfor %}
+                <span class="secondary-content">{{ expense.date.strftime('%d %b %Y') }}</span>
+                
+                {{ expense.payType.type }}
+            </li>
+             
+            <!-- Modal Bottom Sheet, triggered via JS (onclick of above li element) -->
+            <div id="modal{{loop.index}}" class="modal bottom-sheet">
+                <div class="modal-content">
+                    {% if expense.nb_buyers > 1 %}
+                        <img src="resources/Pictures/iconMulti.png" alt="" class="circle" style="width:42px">
+                    {% else %}
+                        <img src="resources/Pictures/icon{% for buyer in expense.buyers %}{{ buyer.firstName[0] }}{% endfor %}.png" alt="" class="circle" style="width:42px">
+                    {% endif %}
+                    
+                    <span class="secondary-content">{{ expense.date.strftime('%d %b %Y') }}6</span>
+                    
+                    <h4>{{expense.object}}</h4>
+                    <p>
+                        <b>{{expense.price}} &euro;</b><br>
+                        Bought for: {{ expense.beneficiaries|join(', ',attribute="firstName") }}, <BR>
+                        Paid with: {{ expense.payType.type }},<br>
+                        Paid from: {{ expense.account.name }}.
+                        
+                        {% for cat in expense.categories %}
+                            <span class="badge teal white-text">{{ cat.name }}</span>
+                        {% endfor %}
+                    </p>
+                </div>
+                <div class="modal-footer">
+                  <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a>
+                  <a href="#!" class=" modal-action waves-effect waves-green btn-flat">EDIT</a>
+                </div>
+            </div>
+            
+        {% endfor %}    
+    
+    <!-- Modal Trigger -->
+    <div class="fixed-action-btn">
+        <a class="btn-floating btn-large red" href="./">
+            <i class="large material-icons">mode_edit</i>
+        </a>
+    </div>
+</div>  <!-- /container -->   
+    
+    
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <!-- Materialize Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+    <script src="./resources/JS/expenseList.js"></script>
 </body>
 </html>
