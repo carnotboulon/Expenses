@@ -47,9 +47,16 @@
             <li class="collection-item avatar" onclick="$('#modal{{loop.index}}').modal('open');">
                 
                 {% if expense.nb_buyers > 1 %}
-                    <img src="resources/Pictures/iconMulti.png" alt="" class="circle">
+                    {% load static %}
+                    <img src="{% static 'ExpApp/Pictures/iconMulti.png' %}" alt="" class="circle">
                 {% else %}
-                    <img src="resources/Pictures/icon{% for buyer in expense.buyers %}{{ buyer.firstName[0] }}{% endfor %}.png" alt="" class="circle">
+                    {{expense.account.owner.all|first|make_list|first}}
+                    {% load static %}
+                    {% with expense.account.owner.all|first|make_list|first as image_static %}
+                        {% with  'ExpApp/Pictures/icon'|add:image_static|add:'.png' as image_path%} 
+                            <img src="{% static image_path %}" alt="" class="circle"/>
+                        {% endwith %}
+                    {% endwith %}                   
                 {% endif %}
                 
                 <span class="title">{{expense.object}}</span>, {{expense.comment}}.
@@ -59,10 +66,10 @@
                     
                 </p>
                 
-                {% for cat in expense.categories %}
+                {% for cat in expense.categories.all %}
                     <span class="badge teal white-text">{{ cat.name }}</span>
                 {% endfor %}
-                <span class="secondary-content">{{ expense.date.strftime('%d %b %Y') }}</span>
+                <span class="secondary-content">{{ expense.date|date:"d b Y" }}</span>
                 
                 {{ expense.payType.type }}
             </li>
@@ -73,19 +80,20 @@
                     {% if expense.nb_buyers > 1 %}
                         <img src="resources/Pictures/iconMulti.png" alt="" class="circle" style="width:42px">
                     {% else %}
-                        <img src="resources/Pictures/icon{% for buyer in expense.buyers %}{{ buyer.firstName[0] }}{% endfor %}.png" alt="" class="circle" style="width:42px">
+                        <img src="resources/Pictures/icon{% for buyer in expense.account.owner.all %}{{ buyer.firstname }}{% endfor %}.png" alt="" class="circle" style="width:42px">
                     {% endif %}
                     
-                    <span class="secondary-content">{{ expense.date.strftime('%d %b %Y') }}6</span>
+                    <span class="secondary-content">{{ expense.date|date:"d b Y" }}</span>
                     
                     <h4>{{expense.object}}</h4>
                     <p>
                         <b>{{expense.price}} &euro;</b><br>
-                        Bought for: {{ expense.beneficiaries|join(', ',attribute="firstName") }}, <BR>
-                        Paid with: {{ expense.payType.type }},<br>
+                        {% regroup beneficiaries by firstname as benefs_list %}
+                        Bought for: {{ benefs_list }}, <BR>
+                        Paid with: {{ expense.payType.name }},<br>
                         Paid from: {{ expense.account.name }}.
                         
-                        {% for cat in expense.categories %}
+                        {% for cat in expense.categories.all %}
                             <span class="badge teal white-text">{{ cat.name }}</span>
                         {% endfor %}
                     </p>
@@ -100,7 +108,7 @@
     
     <!-- Modal Trigger -->
     <div class="fixed-action-btn">
-        <a class="btn-floating btn-large red" href="./">
+        <a class="btn-floating btn-large red" href="./add">
             <i class="large material-icons">mode_edit</i>
         </a>
     </div>

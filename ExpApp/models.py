@@ -63,5 +63,13 @@ class Expense(models.Model):
     recordedBy = models.ForeignKey(Person,related_name = "recorder", on_delete=models.DO_NOTHING)
     recordedOn = models.DateField(auto_now_add=True)
     
+    @property
+    def nb_beneficiaries(self):
+        return len(self.beneficiaries.all())
+    
+    @property
+    def nb_buyers(self):
+        return len(self.account.owner.all())
+    
     def __str__(self):
         return "[%s] %s" % (self.date, self.object)

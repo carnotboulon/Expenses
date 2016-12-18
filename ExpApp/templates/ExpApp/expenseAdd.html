@@ -46,14 +46,14 @@
             <form method="post" class="col s12">
                 <div class="row">
                     <div class="input-field col s6">
-                        <input name="expense" type="text" class="validate">
+                        <input name="expense" type="text" class="validate" value="{{ object }}">
                         <label for="expense">Expense</label>
                     </div>
                     <div class="input-field col s6">
                         <select name="categories" multiple>
                             <option value="" disabled selected>Choose your option</option>
                             {% for cat in categoryList %}
-                                <option value="{{cat.id}}">{{ cat.name }}</option>
+                                <option {% if cat.1.selected %}selected{% endif %} value="{{ cat.1.catObject.id }}">{{ cat.0 }}</option>
                             {% endfor %}
                         </select>
                         <label>Categories</label>
@@ -62,7 +62,7 @@
                 
                 <div class="row">
                     <div class="input-field col s12">
-                        <input name="comment" type="text" class="validate">
+                        <input name="comment" type="text" class="validate" value="{{ comment }}">
                         <label for="comment">Comment</label>
                     </div>
                 </div>                  
@@ -82,7 +82,7 @@
                             <option value="" disabled selected>Choose your option</option>
                             <option value="0">Tous</option>
                             {% for p in personList %}
-                                <option value="{{p.id}}">{{ p.firstName }}</option>
+                                <option {% if p.1.selected %}selected{% endif %} value="{{p.1.persObject.id}}">{{ p.1.persObject.surname }}</option>
                             {% endfor %}
                         </select>
                         <label>For who</label>
@@ -108,7 +108,7 @@
                         <select name="account">
                             <option value="" disabled selected>Choose your option</option>
                             {% for account in accountList %}
-                                <option value={{account.id}}>{{ account.name }}</option>
+                                <option {% if account.1.selected %}selected{% endif %} value={{account.1.bankObject.id}}>{{ account.0 }}</option>
                             {% endfor %}
                         </select>
                         <label>Bank Account</label>
@@ -118,7 +118,7 @@
                         <select name="payType">
                             <option value="" disabled selected>Choose your option</option>
                             {% for type in payTypes %}
-                                <option value={{type.id}}>{{ type.type }}</option>
+                                <option {% if type.1.selected %}selected{% endif %} value={{type.1.payTObject.id}}>{{ type.0 }}</option>
                             {% endfor %}
                         </select>
                         <label>Paid with</label>
@@ -138,7 +138,7 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <!-- Materialize Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
-    <script src="./resources/JS/expenseList.js"></script>
+    <!--<script src="./resources/JS/expenseList.js"></script>-->
     <script>
         $(function() {
             //TODO: Faire le edit 
