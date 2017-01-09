@@ -13,7 +13,10 @@ class Person(models.Model):
     email = models.EmailField(max_length=128)
     
     def __str__(self):
-        return "%s: %s %s [%s]" % (self.surname, self.firstname, self.lastname, self.email)
+        # return "%s: %s %s [%s]" % (self.surname, self.firstname, self.lastname, self.email)
+        return "%s" % (self.surname)
+    
+    
     
 class Currency(models.Model):
     name = models.CharField(max_length=32)

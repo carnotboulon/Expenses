@@ -77,19 +77,26 @@
             <!-- Modal Bottom Sheet, triggered via JS (onclick of above li element) -->
             <div id="modal{{loop.index}}" class="modal bottom-sheet">
                 <div class="modal-content">
+                                        
                     {% if expense.nb_buyers > 1 %}
-                        <img src="resources/Pictures/iconMulti.png" alt="" class="circle" style="width:42px">
+                        {% load static %}
+                        <img src="{% static 'ExpApp/Pictures/iconMulti.png' %}" alt="" class="circle">
                     {% else %}
-                        <img src="resources/Pictures/icon{% for buyer in expense.account.owner.all %}{{ buyer.firstname }}{% endfor %}.png" alt="" class="circle" style="width:42px">
+                        {% load static %}
+                        {% with expense.account.owner.all|first|make_list|first as image_static %}
+                            {% with  'ExpApp/Pictures/icon'|add:image_static|add:'.png' as image_path%} 
+                                <img src="{% static image_path %}" style="max-width:5%;" alt="" class="circle"/>
+                            {% endwith %}
+                        {% endwith %}                   
                     {% endif %}
+                    
                     
                     <span class="secondary-content">{{ expense.date|date:"d b Y" }}</span>
                     
                     <h4>{{expense.object}}</h4>
                     <p>
                         <b>{{expense.price}} &euro;</b><br>
-                        {% regroup beneficiaries by firstname as benefs_list %}
-                        Bought for: {{ benefs_list }}, <BR>
+                        Bought for: {{ expense.beneficiaries.all|join:"," }}, <BR>
                         Paid with: {{ expense.payType.name }},<br>
                         Paid from: {{ expense.account.name }}.
                         
@@ -119,6 +126,6 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <!-- Materialize Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
-    <script src="./resources/JS/expenseList.js"></script>
+    <script src="/static/ExpApp/JS/expenseList.js"></script>
 </body>
 </html>

@@ -37,7 +37,7 @@ $(function() {
         }
     );
   
-/*
+  
     //Attach dble CLICK handler on table elements to delete the element.
     $('table tr').dblclick(function(event){
         console.log($(this).attr("id"));
@@ -71,7 +71,7 @@ $(function() {
         );         
         $( "#popupDialog" ).popup( "open");
         });
-*/
+  
     
 });//end of master function.
 

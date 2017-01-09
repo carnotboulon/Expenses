@@ -21,7 +21,7 @@ def index(request, expense_number = 20):
     return render(request, "expapp/expenseList.html",context)
     
 def add(request, expense_id):
-    # Collects all lists and add a field to check of the itme is selected.
+    # Collects all lists and add a field to check of the item is selected.
     allCats = {}
     for cat in Category.objects.all():
         allCats[cat.name] = {"catObject": cat, "selected":0}
