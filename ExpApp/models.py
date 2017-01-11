@@ -49,7 +49,7 @@ class PayementType(models.Model):
         return "%s" % (self.name)
 
 class Expense(models.Model):
-    date = models.DateField(auto_now=True)
+    date = models.DateField()
     object = models.CharField(max_length=32)
     comment = models.CharField(max_length=200)
     

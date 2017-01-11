@@ -1,8 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.template import loader
+from django.core.urlresolvers import reverse
 
-from ExpApp.models import Expense,Category,PayementType,BankAccount,Person
+from ExpApp.models import Expense,Category,PayementType,BankAccount,Person, Currency
 
 import time, datetime
 import logging
@@ -12,7 +13,6 @@ log = logging.getLogger(__name__)
 
 # Create your views here.
 def index(request, expense_number = 20):
-    log.info("Bonjour from index.")
     output = ""
     expense_number = min(expense_number, 100)
     
@@ -43,27 +43,26 @@ def add(request, expense_id):
              
     # If expenseId is specified, tries to retrieve expense.
     if expense_id:
-        expense = Expense.objects.filter(id=expense_id)
-        if expense.exists():
-            expense = expense.first()
-            object = expense.object
-            comment = expense.comment
-            price = expense.price
-            date = expense.date
-            for cat in expense.categories.all():
-                if cat.name in allCats.keys():
-                    allCats[cat.name]["selected"] = 1
-            
-            for pers in expense.beneficiaries.all():
-                if pers.email in allPers.keys():
-                    allPers[pers.email]["selected"] = 1        
-            
-            if expense.account.name in allAccounts.keys():
-                allAccounts[expense.account.name]["selected"] = 1
+        expense = get_object_or_404(Expense, pk=expense_id)
+        log.info(expense)
+        object = expense.object
+        comment = expense.comment
+        price = expense.price
+        date = expense.date
+        for cat in expense.categories.all():
+            if cat.name in allCats.keys():
+                allCats[cat.name]["selected"] = 1
+        
+        for pers in expense.beneficiaries.all():
+            if pers.email in allPers.keys():
+                allPers[pers.email]["selected"] = 1        
+        
+        if expense.account.name in allAccounts.keys():
+            allAccounts[expense.account.name]["selected"] = 1
 
-            if expense.payType.name in allPayTypes.keys():
-                allPayTypes[expense.payType.name]["selected"] = 1
-    
+        if expense.payType.name in allPayTypes.keys():
+            allPayTypes[expense.payType.name]["selected"] = 1
+
     else:     #expense_id not provided, initialize with empty fields.
         object = comment = price = ""
         date = (datetime.date.today() + datetime.timedelta(days=0)).strftime(DATE_FORMAT)     
@@ -82,8 +81,60 @@ def add(request, expense_id):
         
     return render(request, "expapp/expenseAdd.html",context)    
 
-def save(request):
-    log.info("Bonjour from saveExpense.")
+def save(request, expense_id):
+    log.info("*** SAVING Expense ***")
+    # log.info(request.META['HTTP_REFERER'])
+    # log.info(dir(request.POST))
+       
+    if expense_id:
+        expense = get_object_or_404(Expense, pk=expense_id)
+        log.info("Expense %s retrieved." % expense_id)
+    else:
+        expense = Expense()
+        log.info(">> Creating new expense.")
+    
+    expense.currency = Currency.objects.get(code="EUR")
+    expense.recordedBy = Person.objects.get(email="arnaudboland@gmail.com")
+    log.info(request.POST['expense'])
+    expense.object = request.POST['expense']
+    
+    log.info(request.POST['comment'])
+    expense.comment = request.POST['comment']
+    
+    log.info(request.POST['date'])
+    date = datetime.datetime.strptime(request.POST['date'], DATE_FORMAT)
+    expense.date = datetime.datetime.strftime(date, "%Y-%m-%d")
+    
+    log.info(request.POST['price'])
+    expense.price = request.POST['price']
+    
+    account = get_object_or_404(BankAccount, pk=request.POST['account'])
+    log.info(account)
+    expense.account = account
+    
+    payType = get_object_or_404(PayementType, pk=request.POST['payType'])
+    log.info(payType)
+    expense.payType = payType
+    
+    expense.save()      # Must be saved before assigning many-to-many fields.
+    
+    catList = request.POST.getlist('categories')
+    categories = [get_object_or_404(Category, pk=c) for c in catList]
+    log.info(categories)
+    expense.categories = categories
+    
+    # Retrieve beneficiaries.
+    benefsList = request.POST.getlist('benefs')
+    if "0" in benefsList:
+        # Tous is selected.
+        benefs = Person.objects.all()
+    else:
+        benefs = [get_object_or_404(Person, pk=b) for b in benefsList]
+    log.info(benefs)
+    expense.beneficiaries = benefsList
+    
+    expense.save()
+       
     return redirect('/expapp/')
     
 def download(request):
