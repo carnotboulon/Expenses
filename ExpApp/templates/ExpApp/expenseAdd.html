@@ -43,7 +43,7 @@
 <BR>
 <div class="container">  
   
-            <form method="post" class="col s12">{% csrf_token %}
+            <form method="post" action="/expapp/save/" class="col s12">{% csrf_token %}
                 <div class="row">
                     <div class="input-field col s6">
                         <input name="expense" type="text" class="validate" value="{{ object }}">

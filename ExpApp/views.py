@@ -1,15 +1,18 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template import loader
 
 from ExpApp.models import Expense,Category,PayementType,BankAccount,Person
 
 import time, datetime
-
+import logging
 DATE_FORMAT = "%d %B, %Y"
+
+log = logging.getLogger(__name__)
 
 # Create your views here.
 def index(request, expense_number = 20):
+    log.info("Bonjour from index.")
     output = ""
     expense_number = min(expense_number, 100)
     
@@ -78,6 +81,10 @@ def add(request, expense_id):
     }
         
     return render(request, "expapp/expenseAdd.html",context)    
+
+def save(request):
+    log.info("Bonjour from saveExpense.")
+    return redirect('/expapp/')
     
 def download(request):
     return HttpResponse("Hello, this is the download page.")

@@ -4,13 +4,15 @@
 	<title>Expenses</title> 	
     <meta name="viewport" content="width=device-width, initial-scale=1"> 
     
-    <!--<link rel="stylesheet" href="./resources/css/expenseList.css" />-->
     <!--<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />-->
     
     <!--Import Google Icon Font-->
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- Mateialize Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    <link rel="stylesheet" href={% load static %}{% static 'ExpApp/CSS/expenseList.css' %} />
+    
+    
     
     <!--
     <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
@@ -25,18 +27,18 @@
 
 <nav>
     <div class="nav-wrapper">
-      <a href="/expapp/" class="brand-logo">&nbsp&nbsp&nbsp B&P Expenses</a>
-      <a href="/expapp/" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+      <a href={% url "expapp:index" %} class="brand-logo">&nbsp&nbsp&nbsp B&P Expenses</a>
+      <a href={% url "expapp:index" %} data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
       <ul class="right hide-on-med-and-down">
-        <li class="active"><a href="/expapp/">List</a></li>
-        <li><a href="/expapp/balance/">Balance</a></li>
-        <li><a href="/expapp/download/"><i class="material-icons">file_download</i></a></li>
+        <li class="active"><a href={% url "expapp:index" %}>List</a></li>
+        <li><a href={% url "expapp:balance" %}>Balance</a></li>
+        <li><a href={% url "expapp:download" %}><i class="material-icons">file_download</i></a></li>
         
       </ul>
       <ul class="side-nav" id="mobile-demo">
-        <li class="active"><a href="/expapp/">List</a></li>
-        <li><a href="/expapp/balance/">Balance</a></li>
-        <li><a href="/expapp/download/">Download</a></li>
+        <li class="active"><a href={% url "expapp:index" %}>List</a></li>
+        <li><a href={% url "expapp:balance" %}>Balance</a></li>
+        <li><a href={% url "expapp:download" %}>Download</a></li>
       </ul>
     </div>
 </nav>
@@ -44,13 +46,13 @@
     
     <ul class="collection">
         {% for expense in expenses %}
-            <li class="collection-item avatar" onclick="$('#modal{{loop.index}}').modal('open');">
+            <li class="collection-item avatar" onclick="$('#modal{{ expense.pk }}').modal('open');">
                 
                 {% if expense.nb_buyers > 1 %}
                     {% load static %}
                     <img src="{% static 'ExpApp/Pictures/iconMulti.png' %}" alt="" class="circle">
                 {% else %}
-                    {{expense.account.owner.all|first|make_list|first}}
+                    
                     {% load static %}
                     {% with expense.account.owner.all|first|make_list|first as image_static %}
                         {% with  'ExpApp/Pictures/icon'|add:image_static|add:'.png' as image_path%} 
@@ -59,7 +61,7 @@
                     {% endwith %}                   
                 {% endif %}
                 
-                <span class="title">{{expense.object}}</span>, {{expense.comment}}.
+                <span class="bold">{{expense.object}}</span> <span class="grey-text lighten-1">,{{expense.comment}}</span>.
                 </label>
                 <p>
                     <b>{{expense.price}} &euro;</b>
@@ -67,47 +69,63 @@
                 </p>
                 
                 {% for cat in expense.categories.all %}
-                    <span class="badge teal white-text">{{ cat.name }}</span>
+                    <span class="mybadge grey lighten-3 grey-text">{{ cat.name }}</span>
                 {% endfor %}
-                <span class="secondary-content">{{ expense.date|date:"d b Y" }}</span>
+                <span class="secondary-content bold">{{ expense.date|date:"d b Y" }}</span>
                 
                 {{ expense.payType.type }}
             </li>
              
             <!-- Modal Bottom Sheet, triggered via JS (onclick of above li element) -->
-            <div id="modal{{loop.index}}" class="modal bottom-sheet">
+            <div id="modal{{ expense.pk }}" class="modal bottom-sheet">
                 <div class="modal-content">
-                                        
-                    {% if expense.nb_buyers > 1 %}
-                        {% load static %}
-                        <img src="{% static 'ExpApp/Pictures/iconMulti.png' %}" alt="" class="circle">
-                    {% else %}
-                        {% load static %}
-                        {% with expense.account.owner.all|first|make_list|first as image_static %}
-                            {% with  'ExpApp/Pictures/icon'|add:image_static|add:'.png' as image_path%} 
-                                <img src="{% static image_path %}" style="max-width:5%;" alt="" class="circle"/>
-                            {% endwith %}
-                        {% endwith %}                   
-                    {% endif %}
-                    
-                    
-                    <span class="secondary-content">{{ expense.date|date:"d b Y" }}</span>
-                    
-                    <h4>{{expense.object}}</h4>
-                    <p>
-                        <b>{{expense.price}} &euro;</b><br>
-                        Bought for: {{ expense.beneficiaries.all|join:"," }}, <BR>
-                        Paid with: {{ expense.payType.name }},<br>
-                        Paid from: {{ expense.account.name }}.
+                        <div class="row">
+                            <div class="col s1">
+                                {% if expense.nb_buyers > 1 %}
+                                    {% load static %}
+                                        <img src="{% static 'ExpApp/Pictures/iconMulti.png' %}" style="max-width:70%;" alt="" class="circle">
+                                {% else %}
+                                    {% load static %}
+                                        {% with expense.account.owner.all|first|make_list|first as image_static %}
+                                            {% with  'ExpApp/Pictures/icon'|add:image_static|add:'.png' as image_path%} 
+                                                <img src="{% static image_path %}" style="max-width:70%;" alt="" class="circle"/>
+                                            {% endwith %}
+                                        {% endwith %}                   
+                                {% endif %}
+                            </div>
+                            <div class="col s11">
+                                <div class="row">
+                                    <div class="col s8"><span class="bold">{{expense.object}}</span></div>
+                                    <div class="col s4"><span class="teal-text text-darken-2 bold">{{ expense.date|date:"d b Y" }}</span></div>
+                                </div>
+                            
+                                <div class="row">
+                                    <div class="col s8"><span class="grey-text lighten-1">{{expense.comment}}</span></div>
+                                    <div class="col s4"><span class="bold">{{expense.price}} &euro; </span></div>
+                                </div>    
+                                
+                                <div class="row">
+                                    <div class="col s4">Bought for:<B> {{ expense.beneficiaries.all|join:"," }} </B></div>
+                                    <div class="col s4">Paid with:<B> {{ expense.payType.name }} </B></div>
+                                    <div class="col s4">Paid from:<B> {{ expense.account }} </B></div>
+                                </div>    
+                                
+                                <div class="row">
+                                    <div class="col s12">
+                                        {% for cat in expense.categories.all %}
+                                            <span class="mybadge grey lighten-3 grey-text">{{ cat.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>    
                         
-                        {% for cat in expense.categories.all %}
-                            <span class="badge teal white-text">{{ cat.name }}</span>
-                        {% endfor %}
-                    </p>
-                </div>
-                <div class="modal-footer">
-                  <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a>
-                  <a href="#!" class=" modal-action waves-effect waves-green btn-flat">EDIT</a>
+                    <!--<div class="modal-footer">-->
+                    <div class="center-align">  
+                      <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a>
+                      <a href={% url "expapp:add" expense.id %} class=" modal-action waves-effect waves-green btn-flat">EDIT</a>
+                    </div>
                 </div>
             </div>
             
@@ -115,7 +133,7 @@
     
     <!-- Modal Trigger -->
     <div class="fixed-action-btn">
-        <a class="btn-floating btn-large red" href="/expapp/add/">
+        <a class="btn-floating btn-large red" href={% url "expapp:add" ""%}>
             <i class="large material-icons">mode_edit</i>
         </a>
     </div>

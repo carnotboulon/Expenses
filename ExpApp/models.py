@@ -39,7 +39,8 @@ class BankAccount(models.Model):
     bank = models.CharField(max_length=32)
 
     def __str__(self):
-        return "%s [%s], %s" % (self.name, self.number, self.bank)
+        # return "%s [%s], %s" % (self.name, self.number, self.bank)
+        return "%s" % (self.name)
     
 class PayementType(models.Model):
     name = models.CharField(max_length=32)
