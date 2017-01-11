@@ -48,7 +48,7 @@ def add(request, expense_id):
         object = expense.object
         comment = expense.comment
         price = expense.price
-        date = expense.date
+        date = expense.date.strftime(DATE_FORMAT)
         for cat in expense.categories.all():
             if cat.name in allCats.keys():
                 allCats[cat.name]["selected"] = 1
@@ -65,8 +65,8 @@ def add(request, expense_id):
 
     else:     #expense_id not provided, initialize with empty fields.
         object = comment = price = ""
-        date = (datetime.date.today() + datetime.timedelta(days=0)).strftime(DATE_FORMAT)     
-            
+        date = datetime.date.today().strftime(DATE_FORMAT)     
+        log.info(date)
     context = {
         'object': object,
         'categoryList': sorted(allCats.items()),
@@ -127,11 +127,12 @@ def save(request, expense_id):
     benefsList = request.POST.getlist('benefs')
     if "0" in benefsList:
         # Tous is selected.
-        benefs = Person.objects.all()
+        benefs = [p for p in Person.objects.all()]   
+        log.info(benefs)
     else:
         benefs = [get_object_or_404(Person, pk=b) for b in benefsList]
     log.info(benefs)
-    expense.beneficiaries = benefsList
+    expense.beneficiaries = benefs
     
     expense.save()
        
