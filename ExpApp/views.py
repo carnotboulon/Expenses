@@ -4,6 +4,8 @@ from django.template import loader
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.contrib.messages import get_messages
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 
 from ExpApp.models import Expense,Category,PayementType,BankAccount,Person, Currency
 
@@ -13,7 +15,7 @@ DATE_FORMAT = "%d %B, %Y"
 
 log = logging.getLogger(__name__)
 
-# TODO: Drop CSV
+# TODO: Upload CSV
 # TODO: Balance
 # TODO: Mobile friendly
 # TODO: Download CSV
@@ -34,46 +36,84 @@ def saveExpense(expenseDict):
         expense.currency = Currency.objects.get(code="EUR")
         expense.recordedBy = Person.objects.get(email="arnaudboland@gmail.com")
         
-        # log.info(expenseDict["object"])
+        log.debug(expenseDict["object"])
         expense.object = expenseDict["object"]
 
-        # log.info(expenseDict["comment"])
+        log.debug(expenseDict["comment"])
         expense.comment = expenseDict["comment"]
 
-        # log.info(expenseDict["price"])
+        log.debug(expenseDict["price"])
         expense.price = expenseDict["price"]
 
-        # log.info(expenseDict["date"])
+        log.debug(expenseDict["date"])
         expense.date = expenseDict["date"]
         
         account = BankAccount.objects.get(name=expenseDict['account'])
-        # log.info(account)
+        log.debug(account)
         expense.account = account
         
         payType = PayementType.objects.get(name=expenseDict['payType'])
-        # log.info(payType)
+        log.debug(payType)
         expense.payType = payType
         
         expense.save()      # Must be saved before assigning many-to-many fields.
         
         catList = expenseDict["categories"].split(",")
         categories = [Category.objects.get(name=c) for c in catList]
-        # log.info(categories)
+        log.debug(categories)
         expense.categories = categories
         
         benefsList = expenseDict["beneficiaries"].split(",")
         benefs = [Person.objects.get(email=b) for b in benefsList]
-        # log.info(benefs)
+        log.debug(benefs)
         expense.beneficiaries = benefs
         
         expense.save()
 
+def computeBalance():
+    pers = Person.query().fetch()
+    # logging.info([p.key.id() for p in pers])
+    persDict = {}
+    
+    # Initialize personal counts.
+    for p in pers:
+        persDict[p.key.id()] = {"exp": 0., "benef": 0.}
+        
+        # Initialise la valeur pour Arn au bilan du 06 JUN 2016.
+        # Derniere depense = Bic pour faire-part 06 JUN 16, 5.77 EUR.
+        # if p.email == "arnaudboland@gmail.com":
+            # persDict[p.key.id()]["benef"] = 341.50 + 88.09
+        # if p.email == "stephanie.thys@gmail.com":
+            # persDict[p.key.id()]["exp"] = 341.50 + 88.09
+    
+    # logging.info(persDict)
+    expenses = Expense.query(ancestor = expensebook_key(expensebook_name))
+    
+    for exp in expenses:
+        # for each expense,
+        # compute each buyer's apport,
+        # logging.info("*** DEPENSE")
+        for buyer in exp.buyers:
+            # logging.info("Comptes %s = %s avant: %s" % (buyer.get().email, buyer.id(), persDict[buyer.id()]))
+            # logging.info("Exp: %s EUR" % (float(exp.price / exp.nb_buyers)))
+            persDict[buyer.id()]["exp"] += float(exp.price / exp.nb_buyers)
+            # logging.info("Comptes %s apres: %s" % (buyer.get().email, persDict[buyer.id()]))
+               
+        # compute each beneficiary part.
+        for benef in exp.beneficiaries:
+            # logging.info("Comptes %s = %s avant: %s" % (benef.get().email, benef.id(), persDict[benef.id()]))
+            # logging.info("Benef: %s EUR" % (float(exp.price / exp.nb_beneficiaries)))
+            persDict[benef.id()]["benef"] += float(exp.price / exp.nb_beneficiaries)
+            # logging.info("Comptes %s apres: %s" % (benef.get().email, persDict[benef.id()]))
+            
+    return persDict        
+
 # Create your views here.
 def index(request, expense_number = 20):
-    log.info("*** INDEX PAGE ***")
+    log.debug("*** INDEX PAGE ***")
     msg_storage = get_messages(request)
     for msg in msg_storage:
-        log.info("[MESSAGE]: %s" % msg)
+        log.debug("[MESSAGE]: %s" % msg)
     
     expense_number = min(expense_number, 100)
     latest_expenses_list = Expense.objects.order_by('-date')[:expense_number]
@@ -155,7 +195,7 @@ def delete(request, expense_id):
     return redirect("/expapp/")
 
 def save(request, expense_id):
-    log.info("*** SAVING Expense ***")
+    log.debug("*** SAVING Expense ***")
     # log.info(request.META['HTTP_REFERER'])
     # log.info(dir(request.POST))
        
@@ -168,32 +208,32 @@ def save(request, expense_id):
     
     expense.currency = Currency.objects.get(code="EUR")
     expense.recordedBy = Person.objects.get(email="arnaudboland@gmail.com")
-    log.info(request.POST['expense'])
+    log.debug(request.POST['expense'])
     expense.object = request.POST['expense']
     
-    log.info(request.POST['comment'])
+    log.debug(request.POST['comment'])
     expense.comment = request.POST['comment']
     
-    log.info(request.POST['date'])
+    log.debug(request.POST['date'])
     date = datetime.datetime.strptime(request.POST['date'], DATE_FORMAT)
     expense.date = datetime.datetime.strftime(date, "%Y-%m-%d")
     
-    log.info(request.POST['price'])
+    log.debug(request.POST['price'])
     expense.price = request.POST['price']
     
     account = get_object_or_404(BankAccount, pk=request.POST['account'])
-    log.info(account)
+    log.debug(account)
     expense.account = account
     
     payType = get_object_or_404(PayementType, pk=request.POST['payType'])
-    log.info(payType)
+    log.debug(payType)
     expense.payType = payType
     
     expense.save()      # Must be saved before assigning many-to-many fields.
     
     catList = request.POST.getlist('categories')
     categories = [get_object_or_404(Category, pk=c) for c in catList]
-    log.info(categories)
+    log.debug(categories)
     expense.categories = categories
     
     # Retrieve beneficiaries.
@@ -201,10 +241,10 @@ def save(request, expense_id):
     if "0" in benefsList:
         # Tous is selected.
         benefs = [p for p in Person.objects.all()]   
-        log.info(benefs)
+        log.debug(benefs)
     else:
         benefs = [get_object_or_404(Person, pk=b) for b in benefsList]
-    log.info(benefs)
+    log.debug(benefs)
     expense.beneficiaries = benefs
     
     expense.save()
@@ -224,22 +264,33 @@ def download(request):
 
 def balance(request):
     return HttpResponse("Hello, this is the balance page.")    
+
+def uploadCSV(request):
+    return render(request, "expapp/expenseFeed.html")
     
 def feed(request):
     success = 0
     total = 0
-    with open('example.csv', 'rb') as csvfile:
+    
+    myfile = request.FILES['csvfile']
+    fs = FileSystemStorage()
+    filename = fs.save(myfile.name, myfile)
+    uploaded_file_url = fs.url(filename)
+    uploaded_file_path = os.path.join(settings.MEDIA_ROOT,filename)
+    log.info("*** FILE %s ***" % filename)
+    log.info("Processing: %s" % uploaded_file_path)
+    
+    with open(uploaded_file_path, 'rb') as csvfile:
         expenseReader = csv.DictReader(csvfile, delimiter=";")
         for row in expenseReader:
-            # log.info("%s >> %s" % (row['object'], row['date']))
             try:
                 saveExpense(row)
                 time.sleep(1)
             except ImportError as error:
-                log.info("Adding expense %s on %s FAILED: a similar expense already exists.")
+                log.warning("Adding expense %s on %s FAILED: a similar expense already exists.")
                 total += 1
             except:
-                log.info("Adding expense %s on %s FAILED: an unexpected expense occurred: %s." % sys.exc_info()[0])
+                log.warning("Adding expense %s on %s FAILED: an unexpected expense occurred: %s." % sys.exc_info()[0])
                 total += 1
             else:            
                 success += 1

@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^download', views.download, name='download'),
     url(r'^balance', views.balance, name='balance'),
     url(r'^feed', views.feed, name='feed'),
+    url(r'^upload', views.uploadCSV, name='upload'),
 ]

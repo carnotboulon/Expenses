@@ -27,6 +27,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+MEDIA_ROOT = r"D:\Arnaud\Github\Expenses"
+
+MEDIA_URL = '/media/'
+
 
 # Application definition
 
