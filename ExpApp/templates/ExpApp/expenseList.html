@@ -16,30 +16,29 @@
 
 <body>
 
-<div class="navbar-fixed">
+<!--<div class="navbar-fixed">-->
     <nav>
         <div class="nav-wrapper">
             <a href={% url "expapp:index" %} class="brand-logo">&nbsp&nbsp&nbsp B&P Expenses</a>
-            <a href={% url "expapp:index" %} data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
-            
+            <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
             <ul class="right hide-on-med-and-down">
-                <li><a id="searchButton"><i class="material-icons">search</i></a></li>
+                <li><a class="searchButton" href="#"><i class="material-icons">search</i></a></li>
                 <li class="active"><a href={% url "expapp:index" %}>List</a></li>
                 <li><a href={% url "expapp:balance" %}>Balance</a></li>
                 <li><a href={% url "expapp:download" %}><i class="material-icons">file_download</i></a></li>
             </ul>
             <ul class="side-nav" id="mobile-demo">
-                <li class="active"><a href={% url "expapp:index" %}>List</a></li>
+                <li><a href={% url "expapp:index" %}>List</a></li>
                 <li><a href={% url "expapp:balance" %}>Balance</a></li>
                 <li><a href={% url "expapp:download" %}>Download</a></li>
+                <li><a href="# "class="searchButton"><i class="material-icons">search</i></a></li>
             </ul>           
         </div>
     </nav>
-    
-</div>
+<!--</div>-->
 
 <div class="container">  
-    <div id="search" class="row valign-wrapper">
+    <div id="search" class="row valign-wrapper" style="display:none;">
         <div class="col s4">
             <form>
                 <div class="input-field" >

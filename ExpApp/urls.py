@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^save/(?P<expense_id>[0-9]*)', views.save, name='save'),
     url(r'^download', views.download, name='download'),
     url(r'^balance', views.balance, name='balance'),
+    url(r'^feed', views.feed, name='feed'),
 ]

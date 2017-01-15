@@ -7,31 +7,80 @@ from django.contrib.messages import get_messages
 
 from ExpApp.models import Expense,Category,PayementType,BankAccount,Person, Currency
 
-import time, datetime
+import time, datetime, csv, os
 import logging
 DATE_FORMAT = "%d %B, %Y"
 
 log = logging.getLogger(__name__)
 
-# TODO: Mobile friendly
-# TODO: Filter
+# TODO: Drop CSV
 # TODO: Balance
-# TODO: Drop Excel
+# TODO: Mobile friendly
+# TODO: Download CSV
+# TODO: Filter
+
+def getExpense(**kwargs):
+    for k in kwargs:
+        log.info("%s >> %s" % (k,kwargs[k]))
+
+def saveExpense(expenseDict):
+    # Check if similar expense exists.
+    similarExpenses = Expense.objects.filter(date=expenseDict["date"], price=expenseDict["price"])
+    if len(similarExpenses) > 0:
+        raise ImportError
+    else:
+        log.info("No similar expense found.")
+        expense = Expense()
+        expense.currency = Currency.objects.get(code="EUR")
+        expense.recordedBy = Person.objects.get(email="arnaudboland@gmail.com")
+        
+        # log.info(expenseDict["object"])
+        expense.object = expenseDict["object"]
+
+        # log.info(expenseDict["comment"])
+        expense.comment = expenseDict["comment"]
+
+        # log.info(expenseDict["price"])
+        expense.price = expenseDict["price"]
+
+        # log.info(expenseDict["date"])
+        expense.date = expenseDict["date"]
+        
+        account = BankAccount.objects.get(name=expenseDict['account'])
+        # log.info(account)
+        expense.account = account
+        
+        payType = PayementType.objects.get(name=expenseDict['payType'])
+        # log.info(payType)
+        expense.payType = payType
+        
+        expense.save()      # Must be saved before assigning many-to-many fields.
+        
+        catList = expenseDict["categories"].split(",")
+        categories = [Category.objects.get(name=c) for c in catList]
+        # log.info(categories)
+        expense.categories = categories
+        
+        benefsList = expenseDict["beneficiaries"].split(",")
+        benefs = [Person.objects.get(email=b) for b in benefsList]
+        # log.info(benefs)
+        expense.beneficiaries = benefs
+        
+        expense.save()
 
 # Create your views here.
-def index(request, expense_number = 20, ):
+def index(request, expense_number = 20):
     log.info("*** INDEX PAGE ***")
     msg_storage = get_messages(request)
     for msg in msg_storage:
         log.info("[MESSAGE]: %s" % msg)
-    # msg = kwargs["msg"]
-    msg = ""
+    
     expense_number = min(expense_number, 100)
     latest_expenses_list = Expense.objects.order_by('-date')[:expense_number]
     
     template = loader.get_template('expapp/expenseList.html')
     
-    context = {'expenses': latest_expenses_list, "message" : msg}
+    context = {'expenses': latest_expenses_list}
     
     return render(request, "expapp/expenseList.html",context)
     
@@ -175,3 +224,31 @@ def download(request):
 
 def balance(request):
     return HttpResponse("Hello, this is the balance page.")    
+    
+def feed(request):
+    success = 0
+    total = 0
+    with open('example.csv', 'rb') as csvfile:
+        expenseReader = csv.DictReader(csvfile, delimiter=";")
+        for row in expenseReader:
+            # log.info("%s >> %s" % (row['object'], row['date']))
+            try:
+                saveExpense(row)
+                time.sleep(1)
+            except ImportError as error:
+                log.info("Adding expense %s on %s FAILED: a similar expense already exists.")
+                total += 1
+            except:
+                log.info("Adding expense %s on %s FAILED: an unexpected expense occurred: %s." % sys.exc_info()[0])
+                total += 1
+            else:            
+                success += 1
+                total += 1
+
+    message = "%s/%s new expenses added." % (success, total)
+    log.info(message)
+    messages.info(request, message)
+    return redirect('/expapp/')    
+    
+    
+    
