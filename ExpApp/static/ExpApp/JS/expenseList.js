@@ -41,6 +41,22 @@ $(function() {
     
     $('.flash').delay(2000).hide("blind","linear");
     
+    //$("#search").delay(1000).hide("blind","linear");
+    
+    $("#searchButton").on("click",function(){
+        if ($("#search").is(":visible")) 
+        {
+            $("#search").hide("blind","linear");
+        }
+        else
+        {
+            $("#search").show();
+        }
+    });
+    
+    
+    
+    
 /*    
     //Attach dble CLICK handler on table elements to delete the element.
     $('table tr').dblclick(function(event){
