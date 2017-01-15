@@ -1,3 +1,4 @@
+/*
 $(document).on("pagecreate", "#expenseSummary", function(){
     $("#expenseSummary .ui-checkbox label")[2].click();
     $("#expenseSummary .ui-checkbox label")[5].click();
@@ -5,6 +6,7 @@ $(document).on("pagecreate", "#expenseSummary", function(){
     $("#expenseSummary .ui-checkbox label")[7].click();
     $("#expenseSummary .ui-checkbox label")[8].click();
 });
+*/
 
 $(function() {
     //Side Nav bar init.
@@ -13,15 +15,11 @@ $(function() {
     //Modal initialisation and options.
     //('.modal').modal();
     
-    
-    
     function openModal()
     {
-        $('#modal1').modal('open');
-        
+        $('#modal1').modal('open');    
     }
-    
-    
+        
     $('.modal').modal({
         dismissible: true, // Modal can be dismissed by clicking outside of the modal
         opacity: .5, // Opacity of modal background
@@ -37,7 +35,13 @@ $(function() {
         }
     );
   
-  
+    $('.confirmation').on('click', function () {
+        return confirm('Are you sure you want to delete this expense?');
+    });
+    
+    $('.flash').delay(2000).hide("blind","linear");
+    
+/*    
     //Attach dble CLICK handler on table elements to delete the element.
     $('table tr').dblclick(function(event){
         console.log($(this).attr("id"));
@@ -71,8 +75,7 @@ $(function() {
         );         
         $( "#popupDialog" ).popup( "open");
         });
-  
-    
+*/    
 });//end of master function.
 
 

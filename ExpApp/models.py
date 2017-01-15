@@ -16,8 +16,6 @@ class Person(models.Model):
         # return "%s: %s %s [%s]" % (self.surname, self.firstname, self.lastname, self.email)
         return "%s" % (self.surname)
     
-    
-    
 class Currency(models.Model):
     name = models.CharField(max_length=32)
     code = models.CharField(max_length=3)

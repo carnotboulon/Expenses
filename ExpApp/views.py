@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.template import loader
 from django.core.urlresolvers import reverse
+from django.contrib import messages
+from django.contrib.messages import get_messages
 
 from ExpApp.models import Expense,Category,PayementType,BankAccount,Person, Currency
 
@@ -11,15 +13,25 @@ DATE_FORMAT = "%d %B, %Y"
 
 log = logging.getLogger(__name__)
 
+# TODO: Mobile friendly
+# TODO: Filter
+# TODO: Balance
+# TODO: Drop Excel
+
 # Create your views here.
-def index(request, expense_number = 20):
-    output = ""
+def index(request, expense_number = 20, ):
+    log.info("*** INDEX PAGE ***")
+    msg_storage = get_messages(request)
+    for msg in msg_storage:
+        log.info("[MESSAGE]: %s" % msg)
+    # msg = kwargs["msg"]
+    msg = ""
     expense_number = min(expense_number, 100)
-    
     latest_expenses_list = Expense.objects.order_by('-date')[:expense_number]
     
     template = loader.get_template('expapp/expenseList.html')
-    context = {'expenses': latest_expenses_list}
+    
+    context = {'expenses': latest_expenses_list, "message" : msg}
     
     return render(request, "expapp/expenseList.html",context)
     
@@ -78,8 +90,20 @@ def add(request, expense_id):
         'payTypes': sorted(allPayTypes.items()),
         'expId': expense_id    
     }
-        
+    
     return render(request, "expapp/expenseAdd.html",context)    
+
+def delete(request, expense_id):
+    if expense_id:
+        log.info("*** REMOVING Expense %s ***" % expense_id)
+        expense = get_object_or_404(Expense, pk=expense_id)
+        message = "Expense %s has been removed." % expense.object
+        log.info(message)
+        messages.info(request, message)
+        expense.delete()
+    else:
+        raise Http404("Missing argument: Expense ID must be specified.")
+    return redirect("/expapp/")
 
 def save(request, expense_id):
     log.info("*** SAVING Expense ***")
@@ -135,7 +159,15 @@ def save(request, expense_id):
     expense.beneficiaries = benefs
     
     expense.save()
-       
+    
+    if expense_id:
+        message = "Expense %s has been edited." % expense.object
+    else:
+        message = "Expense %s has been added." % expense.object
+        
+    log.info(message)
+    messages.info(request, message)
+    
     return redirect('/expapp/')
     
 def download(request):

@@ -1,3 +1,4 @@
+/*
 $(document).on("pagecreate", "#expenseSummary", function(){
     $("#expenseSummary .ui-checkbox label")[2].click();
     $("#expenseSummary .ui-checkbox label")[5].click();
@@ -5,6 +6,8 @@ $(document).on("pagecreate", "#expenseSummary", function(){
     $("#expenseSummary .ui-checkbox label")[7].click();
     $("#expenseSummary .ui-checkbox label")[8].click();
 });
+*/
+
 
 $(function() {
     //Side Nav bar init.
@@ -36,7 +39,16 @@ $(function() {
         //complete: function() { alert('Closed'); } // Callback for Modal close
         }
     );
-  
+
+    
+    $('.confirmation').on('click', function () {
+        return confirm('Are you sure you want to delete this expense?');
+    });
+    
+    
+    
+    
+    
 /*
     //Attach dble CLICK handler on table elements to delete the element.
     $('table tr').dblclick(function(event){

@@ -26,4 +26,28 @@
     font-style: italic; 
 }
 
+.flash
+{
+    margin: 10px 0 10px 0;
+    padding: 10px 0 10px 20px;
+    border-radius: 3px;
+    opacity: 0.8;
+    filter: alpha(opacity=80); /* For IE8 and earlier */
+    
+    /*
+    position: fixed;
+    top: 50px;
+    z-index: 10000;
+    */
+}
 
+.success
+{
+    background-color: #e0f2f1;
+    color: #00695c ;
+}
+
+#search
+{
+    margin-top: 20px;
+}

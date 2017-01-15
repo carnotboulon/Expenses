@@ -11,39 +11,53 @@
     <!-- Mateialize Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
     <link rel="stylesheet" href={% load static %}{% static 'ExpApp/CSS/expenseList.css' %} />
-    
-    
-    
-    <!--
-    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-    <script src="./resources/JS/jqueryFinger.js"></script>
-    <script src="./resources/JS/expenseList.js"></script>
-    -->
+
 </head> 
 
 <body>
 
-
-<nav>
-    <div class="nav-wrapper">
-      <a href={% url "expapp:index" %} class="brand-logo">&nbsp&nbsp&nbsp B&P Expenses</a>
-      <a href={% url "expapp:index" %} data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
-      <ul class="right hide-on-med-and-down">
-        <li class="active"><a href={% url "expapp:index" %}>List</a></li>
-        <li><a href={% url "expapp:balance" %}>Balance</a></li>
-        <li><a href={% url "expapp:download" %}><i class="material-icons">file_download</i></a></li>
-        
-      </ul>
-      <ul class="side-nav" id="mobile-demo">
-        <li class="active"><a href={% url "expapp:index" %}>List</a></li>
-        <li><a href={% url "expapp:balance" %}>Balance</a></li>
-        <li><a href={% url "expapp:download" %}>Download</a></li>
-      </ul>
-    </div>
-</nav>
-<div class="container">  
+<div class="navbar-fixed">
+    <nav>
+        <div class="nav-wrapper">
+            <a href={% url "expapp:index" %} class="brand-logo">&nbsp&nbsp&nbsp B&P Expenses</a>
+            <a href={% url "expapp:index" %} data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+            
+            <ul class="right hide-on-med-and-down">
+                <li><a href={% url "expapp:index" %}><i class="material-icons">search</i></a></li>
+                <li class="active"><a href={% url "expapp:index" %}>List</a></li>
+                <li><a href={% url "expapp:balance" %}>Balance</a></li>
+                <li><a href={% url "expapp:download" %}><i class="material-icons">file_download</i></a></li>
+            </ul>
+            <ul class="side-nav" id="mobile-demo">
+                <li class="active"><a href={% url "expapp:index" %}>List</a></li>
+                <li><a href={% url "expapp:balance" %}>Balance</a></li>
+                <li><a href={% url "expapp:download" %}>Download</a></li>
+            </ul>           
+        </div>
+    </nav>
     
+</div>
+
+<div class="container">  
+    <div id="search" class="row valign-wrapper">
+        <div class="col s4">
+            <form>
+                <div class="input-field" >
+                    <i class="material-icons prefix">search</i>
+                    <input id="icon_prefix" type="text" class="validate">
+                    <label for="icon_prefix">Search</label>
+                </div>
+            </form>
+        </div>
+        <div class="col s8 valign">
+            Tags           
+        </div>
+    </div>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="flash success">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
     <ul class="collection">
         {% for expense in expenses %}
             <li class="collection-item avatar" onclick="$('#modal{{ expense.pk }}').modal('open');">
@@ -61,12 +75,11 @@
                     {% endwith %}                   
                 {% endif %}
                 
-                <span class="bold">{{expense.object}}</span><span class="grey-text text-lighten-1">, {{expense.comment}}</span>.
-                </label>
+                <span class="bold">{{expense.object}}</span><span class="grey-text text-lighten-1">, {{expense.comment}}.</span>
                 <p>
                     <b>{{expense.price}} &euro;</b>
-                    
                 </p>
+                
                 
                 {% for cat in expense.categories.all %}
                     <span class="mybadge grey lighten-3 grey-text">{{ cat.name }}</span>
@@ -121,10 +134,11 @@
                             </div>
                         </div>    
                         
-                    <!--<div class="modal-footer">-->
-                    <div class="center-align">  
-                      <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a>
-                      <a href={% url "expapp:add" expense.id %} class=" modal-action waves-effect waves-green btn-flat">EDIT</a>
+                    <div class="modal-footer">
+                    <!--<div class="center-align">-->  
+                        <a href={% url "expapp:delete" expense.id %} class="confirmation modal-action waves-effect waves-red btn-flat">DELETE</a>
+                        <a href={% url "expapp:add" expense.id %} class=" modal-action waves-effect waves-green btn-flat">EDIT</a>
+                        <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a>
                     </div>
                 </div>
             </div>
