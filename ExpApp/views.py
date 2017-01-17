@@ -15,10 +15,10 @@ DATE_FORMAT = "%d %B, %Y"
 
 log = logging.getLogger(__name__)
 
-# TODO: Upload CSV
-# TODO: Balance
-# TODO: Mobile friendly
-# TODO: Download CSV
+# TODO: Upload CSV -> Done
+# TODO: Balance -> Done
+# TODO: Mobile friendly 
+# TODO: Download CSV -> Done
 # TODO: Filter
 
 def getExpense(**kwargs):
@@ -71,40 +71,26 @@ def saveExpense(expenseDict):
         expense.save()
 
 def computeBalance():
-    pers = Person.query().fetch()
-    # logging.info([p.key.id() for p in pers])
+    pers = Person.objects.all()
+    log.debug(pers)
     persDict = {}
     
     # Initialize personal counts.
     for p in pers:
-        persDict[p.key.id()] = {"exp": 0., "benef": 0.}
-        
-        # Initialise la valeur pour Arn au bilan du 06 JUN 2016.
-        # Derniere depense = Bic pour faire-part 06 JUN 16, 5.77 EUR.
-        # if p.email == "arnaudboland@gmail.com":
-            # persDict[p.key.id()]["benef"] = 341.50 + 88.09
-        # if p.email == "stephanie.thys@gmail.com":
-            # persDict[p.key.id()]["exp"] = 341.50 + 88.09
+        persDict[p.email] = {"exp": 0., "benef": 0.}
     
-    # logging.info(persDict)
-    expenses = Expense.query(ancestor = expensebook_key(expensebook_name))
+    expenses = Expense.objects.all()
     
     for exp in expenses:
         # for each expense,
         # compute each buyer's apport,
-        # logging.info("*** DEPENSE")
-        for buyer in exp.buyers:
-            # logging.info("Comptes %s = %s avant: %s" % (buyer.get().email, buyer.id(), persDict[buyer.id()]))
-            # logging.info("Exp: %s EUR" % (float(exp.price / exp.nb_buyers)))
-            persDict[buyer.id()]["exp"] += float(exp.price / exp.nb_buyers)
-            # logging.info("Comptes %s apres: %s" % (buyer.get().email, persDict[buyer.id()]))
+        buyers = exp.account.owner.all()
+        for buyer in buyers:
+            persDict[buyer.email]["exp"] += float(exp.price / exp.nb_buyers)
                
         # compute each beneficiary part.
-        for benef in exp.beneficiaries:
-            # logging.info("Comptes %s = %s avant: %s" % (benef.get().email, benef.id(), persDict[benef.id()]))
-            # logging.info("Benef: %s EUR" % (float(exp.price / exp.nb_beneficiaries)))
-            persDict[benef.id()]["benef"] += float(exp.price / exp.nb_beneficiaries)
-            # logging.info("Comptes %s apres: %s" % (benef.get().email, persDict[benef.id()]))
+        for benef in exp.beneficiaries.all():
+            persDict[benef.email]["benef"] += float(exp.price / exp.nb_beneficiaries)
             
     return persDict        
 
@@ -260,11 +246,71 @@ def save(request, expense_id):
     return redirect('/expapp/')
     
 def download(request):
-    return HttpResponse("Hello, this is the download page.")
+    expenses = Expense.objects.all()
+    expList = []
+    # Go through expenses and store them in a dict. 
+    # Possible improvement: could be done via render function.
+    for exp in expenses:
+        expItem = {}
+        expItem["date"] = exp.date
+        expItem["object"] = exp.object
+        expItem["comment"] = exp.comment
+        expItem["price"] = exp.price
+        expItem["categories"] = [e.name for e in exp.categories.all()]
+        expItem["account"] = exp.account.name
+        expItem["buyers"] = [e.email for e in exp.account.owner.all()]
+        expItem["beneficiaries"] = [e.email for e in exp.beneficiaries.all()]
+        expItem["payType"] = exp.payType.name
+        expList.append(expItem)
+    
+    # Generates the file content (header + expenses).
+    fileContent = ""
+    fileContent += "object;comment;date;price;categories;account;beneficiaries;payType \n"
+    for exp in expList:
+        extStr = "%s ; %s ; %s ; %s ; %s ; %s ; %s ; %s\n" % (exp["object"],exp["comment"],exp["date"],("%.2f" % exp["price"]).replace(".",","), ",".join(exp["categories"]), exp["account"], ",".join(exp["beneficiaries"]), exp["payType"]) 
+        fileContent += extStr.encode("utf-8")
+    
+    response = HttpResponse(fileContent, content_type='text/csv')
+    response['Content-Disposition'] = "attachment; filename=ExportDB-%s.csv" % time.strftime("%d%b%y")
+    
+    return response
 
 def balance(request):
-    return HttpResponse("Hello, this is the balance page.")    
-
+    balance = computeBalance()
+    log.info(balance)
+    
+    messages = {}
+    for p in balance.keys():
+        pName = Person.objects.get(email=p).surname
+        msgExpense = "%s spent %s EUR" % (pName, balance[p]["exp"])
+        msgBenefs = "%s EUR of the expenses were for %s" % (balance[p]["benef"], pName)
+        
+        log.info(msgExpense)
+        log.info(msgBenefs)
+        
+        messages[pName] = []
+        messages[pName].append(msgExpense)
+        messages[pName].append(msgBenefs)
+        
+        personalBalance = balance[p]["exp"] - balance[p]["benef"]
+        if personalBalance > 0.01:
+            message = "%s needs %.2f EUR back." % (pName, abs(personalBalance)) 
+            log.info(message)
+            messages[pName].append(message)
+        elif personalBalance < 0.01:
+            message = "%s ows %.2f EUR back." % (pName, abs(personalBalance)) 
+            log.info(message)
+            messages[pName].append(message)
+        else:
+            message.append("Accounts are balanced!")
+            log.info(message)
+            messages[pName].append(message)
+    
+    messages = messages.items()
+    context = {'balanceMessages': messages}
+    log.info(messages)
+    return render(request, "expapp/balance.html",context)
+    
 def uploadCSV(request):
     return render(request, "expapp/expenseFeed.html")
     

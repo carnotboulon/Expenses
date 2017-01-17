@@ -1,0 +1,75 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+	<title>Expenses</title> 	
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    
+    <!--<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />-->
+    
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Mateialize Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    <link rel="stylesheet" href={% load static %}{% static 'ExpApp/CSS/expenseList.css' %} />
+
+</head> 
+
+<body>
+
+<!--<div class="navbar-fixed">-->
+    <nav>
+        <div class="nav-wrapper">
+            <a href={% url "expapp:index" %} class="brand-logo">&nbsp&nbsp&nbsp B&P Expenses</a>
+            <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+            <ul class="right hide-on-med-and-down">
+                <li><a class="searchButton" href="#"><i class="material-icons">search</i></a></li>
+                <li><a href={% url "expapp:index" %}>List</a></li>
+                <li class="active"><a href={% url "expapp:balance" %}>Balance</a></li>
+                <li><a href={% url "expapp:download" %}><i class="material-icons">file_download</i></a></li>
+            </ul>
+            <ul class="side-nav" id="mobile-demo">
+                <li><a href={% url "expapp:index" %}>List</a></li>
+                <li class="active"><a href={% url "expapp:balance" %}>Balance</a></li>
+                <li><a href={% url "expapp:download" %}>Download</a></li>
+                <li><a href="# "class="searchButton"><i class="material-icons">search</i></a></li>
+            </ul>           
+        </div>
+    </nav>
+<!--</div>-->
+
+    <div class="container">  
+        <ul class="collection">
+            {% for name, msgs in balanceMessages %}
+            <li class="collection-item avatar">
+      
+                {% load static %}
+                {% with name|make_list|first as image_static %}
+                    {% with  'ExpApp/Pictures/icon'|add:image_static|add:'.png' as image_path%} 
+                        <img src="{% static image_path %}" alt="" class="circle"/>
+                    {% endwith %}
+                {% endwith %}                   
+            
+                
+                <span class="teal-text"><B>{{ name }}</B></span>
+                <p>
+                {% for msg in msgs %}
+                    {% if forloop.last %}
+                        <B>{{ msg }}</B><BR>
+                    {% else %}
+                        {{ msg }}<BR>
+                    {% endif %}                    
+                {% endfor %}
+                </p>                
+            </li>
+            {% endfor %}
+        </ul>
+    </div>  <!-- /container -->   
+    
+    
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <!-- Materialize Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+    <script src="/static/ExpApp/JS/expenseList.js"></script>
+</body>
+</html>
