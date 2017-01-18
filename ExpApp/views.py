@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, Http404
 from django.template import loader
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.conf import settings
@@ -9,7 +10,7 @@ from django.core.files.storage import FileSystemStorage
 
 from ExpApp.models import Expense,Category,PayementType,BankAccount,Person, Currency
 
-import time, datetime, csv, os
+import time, datetime, csv, os, sys
 import logging
 DATE_FORMAT = "%d %B, %Y"
 
@@ -17,8 +18,11 @@ log = logging.getLogger(__name__)
 
 # TODO: Upload CSV -> Done
 # TODO: Balance -> Done
-# TODO: Mobile friendly 
+# TODO: Mobile friendly -> Done
 # TODO: Download CSV -> Done
+# TODO: login
+# TODO: auto complete
+# TODO: show more, dynamic loading.
 # TODO: Filter
 
 def getExpense(**kwargs):
@@ -27,11 +31,13 @@ def getExpense(**kwargs):
 
 def saveExpense(expenseDict):
     # Check if similar expense exists.
+    log.info("*** Saving Expense ***")
     similarExpenses = Expense.objects.filter(date=expenseDict["date"], price=expenseDict["price"])
     if len(similarExpenses) > 0:
+        # log.info("Similar expense found.")
         raise ImportError
     else:
-        log.info("No similar expense found.")
+        log.debug("No similar expense found.")
         expense = Expense()
         expense.currency = Currency.objects.get(code="EUR")
         expense.recordedBy = Person.objects.get(email="arnaudboland@gmail.com")
@@ -47,9 +53,9 @@ def saveExpense(expenseDict):
 
         log.debug(expenseDict["date"])
         expense.date = expenseDict["date"]
-        
+                
+        log.debug(expenseDict['account'])
         account = BankAccount.objects.get(name=expenseDict['account'])
-        log.debug(account)
         expense.account = account
         
         payType = PayementType.objects.get(name=expenseDict['payType'])
@@ -57,16 +63,24 @@ def saveExpense(expenseDict):
         expense.payType = payType
         
         expense.save()      # Must be saved before assigning many-to-many fields.
-        
-        catList = expenseDict["categories"].split(",")
-        categories = [Category.objects.get(name=c) for c in catList]
-        log.debug(categories)
-        expense.categories = categories
+        log.debug("First Save")
         
         benefsList = expenseDict["beneficiaries"].split(",")
         benefs = [Person.objects.get(email=b) for b in benefsList]
         log.debug(benefs)
         expense.beneficiaries = benefs
+        
+        catList = expenseDict["categories"].split(",")
+        cats = []
+        for c in catList:
+            try:
+                cat = Category.objects.get(name=c)
+            except ObjectDoesNotExist:
+                log.info("Creating Catgeory %s" % c)
+                cat = Category(name=c).save()
+        
+        cats.append(cat)
+        expense.categories = cats
         
         expense.save()
 
@@ -87,7 +101,6 @@ def computeBalance():
         buyers = exp.account.owner.all()
         for buyer in buyers:
             persDict[buyer.email]["exp"] += float(exp.price / exp.nb_buyers)
-               
         # compute each beneficiary part.
         for benef in exp.beneficiaries.all():
             persDict[benef.email]["benef"] += float(exp.price / exp.nb_beneficiaries)
@@ -96,14 +109,14 @@ def computeBalance():
 
 # Create your views here.
 def index(request, expense_number = 20):
+    messages.info(request, "Display the %s last expenses." % expense_number)
     log.debug("*** INDEX PAGE ***")
     msg_storage = get_messages(request)
     for msg in msg_storage:
         log.debug("[MESSAGE]: %s" % msg)
     
-    expense_number = min(expense_number, 100)
+    expense_number = min(int(expense_number), 1000)
     latest_expenses_list = Expense.objects.order_by('-date')[:expense_number]
-    
     template = loader.get_template('expapp/expenseList.html')
     
     context = {'expenses': latest_expenses_list}
@@ -282,8 +295,8 @@ def balance(request):
     messages = {}
     for p in balance.keys():
         pName = Person.objects.get(email=p).surname
-        msgExpense = "%s spent %s EUR" % (pName, balance[p]["exp"])
-        msgBenefs = "%s EUR of the expenses were for %s" % (balance[p]["benef"], pName)
+        msgExpense = "%s spent %.2f EUR" % (pName, balance[p]["exp"])
+        msgBenefs = "%.2f EUR of the expenses were for %s" % (balance[p]["benef"], pName)
         
         log.info(msgExpense)
         log.info(msgBenefs)
@@ -298,7 +311,7 @@ def balance(request):
             log.info(message)
             messages[pName].append(message)
         elif personalBalance < 0.01:
-            message = "%s ows %.2f EUR back." % (pName, abs(personalBalance)) 
+            message = "%s ows %.2f EUR." % (pName, abs(personalBalance)) 
             log.info(message)
             messages[pName].append(message)
         else:
@@ -313,6 +326,27 @@ def balance(request):
     
 def uploadCSV(request):
     return render(request, "expapp/expenseFeed.html")
+
+def cleanExpense(expenseDict):
+    for key in expenseDict:
+        # log.debug(key)
+        if key == "beneficiaries" or key == "categories":
+            cleanList = [b.strip() for b in expenseDict[key].split(",")] 
+            if len(cleanList) ==1:
+                expenseDict[key] = expenseDict[key].strip()
+            else:
+                expenseDict[key] = ",".join(cleanList)
+        elif key == "date":
+            dateStr = expenseDict[key][:-2] +"20"+expenseDict[key][-2:]
+            date = datetime.datetime.strptime(dateStr, "%d-%m-%Y")
+            expenseDict[key] = datetime.datetime.strftime(date, "%Y-%m-%d")
+        elif key == "price":
+            expenseDict[key] = expenseDict[key].replace(",",".")
+        
+        else:
+            expenseDict[key] = expenseDict[key].strip()
+            
+    return expenseDict
     
 def feed(request):
     success = 0
@@ -329,14 +363,15 @@ def feed(request):
     with open(uploaded_file_path, 'rb') as csvfile:
         expenseReader = csv.DictReader(csvfile, delimiter=";")
         for row in expenseReader:
+            row = cleanExpense(row)
             try:
+                time.sleep(0.2)
                 saveExpense(row)
-                time.sleep(1)
             except ImportError as error:
-                log.warning("Adding expense %s on %s FAILED: a similar expense already exists.")
+                log.warning("Adding expense %s on %s FAILED: a similar expense already exists." % (row["object"], row["date"]))
                 total += 1
             except:
-                log.warning("Adding expense %s on %s FAILED: an unexpected expense occurred: %s." % sys.exc_info()[0])
+                log.warning("Adding expense %s on %s FAILED: an unexpected expense occurred: %s." % (row["object"], row["date"], sys.exc_info()[0]))
                 total += 1
             else:            
                 success += 1

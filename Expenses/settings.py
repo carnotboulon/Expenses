@@ -147,7 +147,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
@@ -171,7 +171,7 @@ LOGGING = {
         },
         'ExpApp.views': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'filters': ['require_debug_true']
         }
     }
