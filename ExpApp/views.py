@@ -7,6 +7,8 @@ from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
 
 from ExpApp.models import Expense,Category,PayementType,BankAccount,Person, Currency
 
@@ -21,9 +23,10 @@ log = logging.getLogger(__name__)
 # TODO: Mobile friendly -> Done
 # TODO: Download CSV -> Done
 # TODO: login
-# TODO: auto complete
 # TODO: show more, dynamic loading.
+# TODO: auto complete
 # TODO: Filter
+# TODO: internal navigation with Ajax for quicker response 
 
 def getExpense(**kwargs):
     for k in kwargs:
@@ -108,9 +111,42 @@ def computeBalance():
     return persDict        
 
 # Create your views here.
+
+def loginView(request):
+    next = ""
+    if "next" in request.GET:
+        next = request.GET["next"]
+    if "login" in request.POST and "password" in request.POST:
+        user = authenticate(username=request.POST["login"], password=request.POST["password"])
+        if user is not None:
+            login(request, user)
+            # A backend authenticated the credentials
+            if next:
+                log.debug("Redirecting to next: %s" % next)
+                return redirect(next)
+            else:
+                log.debug("next not specified, redirect to index.")
+                return redirect("/expapp/")
+        else:
+            # No backend authenticated the credentials
+            return redirect("/expapp/login/")
+        
+    else:
+        log.debug(next)
+        context = {"next": next}
+        return render(request, "expapp/login.html", context)
+
+@login_required(login_url='/expapp/login/')
+def logoutView(request):
+    logout(request)
+    return redirect("/expapp/login/")
+        
+@login_required(login_url='/expapp/login/')
 def index(request, expense_number = 20):
     messages.info(request, "Display the %s last expenses." % expense_number)
     log.debug("*** INDEX PAGE ***")
+    log.debug("User: %s" % request.user)
+    
     msg_storage = get_messages(request)
     for msg in msg_storage:
         log.debug("[MESSAGE]: %s" % msg)
@@ -122,7 +158,8 @@ def index(request, expense_number = 20):
     context = {'expenses': latest_expenses_list}
     
     return render(request, "expapp/expenseList.html",context)
-    
+
+@login_required(login_url='/expapp/login/') 
 def add(request, expense_id):
     # Collects all lists and add a field to check of the item is selected.
     allCats = {}
@@ -181,6 +218,7 @@ def add(request, expense_id):
     
     return render(request, "expapp/expenseAdd.html",context)    
 
+@login_required(login_url='/expapp/login/')
 def delete(request, expense_id):
     if expense_id:
         log.info("*** REMOVING Expense %s ***" % expense_id)
@@ -193,6 +231,7 @@ def delete(request, expense_id):
         raise Http404("Missing argument: Expense ID must be specified.")
     return redirect("/expapp/")
 
+@login_required(login_url='/expapp/login/')
 def save(request, expense_id):
     log.debug("*** SAVING Expense ***")
     # log.info(request.META['HTTP_REFERER'])
@@ -257,7 +296,8 @@ def save(request, expense_id):
     messages.info(request, message)
     
     return redirect('/expapp/')
-    
+
+@login_required(login_url='/expapp/login/')    
 def download(request):
     expenses = Expense.objects.all()
     expList = []
@@ -288,6 +328,7 @@ def download(request):
     
     return response
 
+@login_required(login_url='/expapp/login/')    
 def balance(request):
     balance = computeBalance()
     log.info(balance)
@@ -323,10 +364,12 @@ def balance(request):
     context = {'balanceMessages': messages}
     log.info(messages)
     return render(request, "expapp/balance.html",context)
-    
+
+@login_required(login_url='/expapp/login/')
 def uploadCSV(request):
     return render(request, "expapp/expenseFeed.html")
 
+@login_required(login_url='/expapp/login/')
 def cleanExpense(expenseDict):
     for key in expenseDict:
         # log.debug(key)
@@ -347,7 +390,8 @@ def cleanExpense(expenseDict):
             expenseDict[key] = expenseDict[key].strip()
             
     return expenseDict
-    
+
+@login_required(login_url='expapp/login/')
 def feed(request):
     success = 0
     total = 0

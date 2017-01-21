@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.contrib.auth import views as auth_views
 
 from . import views
 
@@ -6,6 +7,8 @@ app_name = 'expapp'
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
+    url(r'^login', views.loginView, name="login"),
+    url(r'^logout', views.logoutView, name="logiout"),
     url(r'^(?P<expense_number>[0-9]+)/$', views.index, name='index'),
     url(r'^add/(?P<expense_id>[0-9]*)', views.add, name='add'),
     url(r'^delete/(?P<expense_id>[0-9]*)', views.delete, name='delete'),
