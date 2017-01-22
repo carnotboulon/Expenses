@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 # TODO: Balance -> Done
 # TODO: Mobile friendly -> Done
 # TODO: Download CSV -> Done
-# TODO: login
+# TODO: login -> Done
 # TODO: show more, dynamic loading.
 # TODO: auto complete
 # TODO: Filter
