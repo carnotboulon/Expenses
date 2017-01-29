@@ -74,7 +74,9 @@ class Expense(models.Model):
         return len(self.account.owner.all())
     
     def __str__(self):
-        return "[%s] %s" % (self.date, self.object)
+        cats = [c.name for c in self.categories.all()]
+        
+        return "[%s] %s %s" % (self.date, self.object, ",".join(cats))
         
                     
         
