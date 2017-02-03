@@ -34,13 +34,13 @@ def getExpense(**kwargs):
 
 def saveExpense(expenseDict):
     # Check if similar expense exists.
-    log.info("*** Saving Expense ***")
+    # log.info("*** Saving Expense ***")
     similarExpenses = Expense.objects.filter(date=expenseDict["date"], price=expenseDict["price"])
     if len(similarExpenses) > 0:
         # log.info("Similar expense found.")
         raise ImportError
     else:
-        log.debug("No similar expense found.")
+        # log.info("No similar expense found.")
         expense = Expense()
         expense.currency = Currency.objects.get(code="EUR")
         expense.recordedBy = Person.objects.get(email="arnaudboland@gmail.com")
@@ -57,12 +57,12 @@ def saveExpense(expenseDict):
         log.debug(expenseDict["date"])
         expense.date = expenseDict["date"]
                 
-        log.debug(expenseDict['account'])
-        account = BankAccount.objects.get(name=expenseDict['account'])
+        log.debug(expenseDict["account"])
+        account = BankAccount.objects.get(name=expenseDict["account"])
         expense.account = account
         
+        log.debug(expenseDict["payType"])
         payType = PayementType.objects.get(name=expenseDict['payType'])
-        log.debug(payType)
         expense.payType = payType
         
         expense.save()      # Must be saved before assigning many-to-many fields.
@@ -318,7 +318,7 @@ def download(request):
     
     # Generates the file content (header + expenses).
     fileContent = ""
-    fileContent += "object;comment;date;price;categories;account;beneficiaries;payType \n"
+    fileContent += "object;comment;date;price;categories;account;beneficiaries;payType\n"
     for exp in expList:
         extStr = "%s ; %s ; %s ; %s ; %s ; %s ; %s ; %s\n" % (exp["object"],exp["comment"],exp["date"],("%.2f" % exp["price"]).replace(".",","), ",".join(exp["categories"]), exp["account"], ",".join(exp["beneficiaries"]), exp["payType"]) 
         fileContent += extStr.encode("utf-8")
@@ -369,7 +369,7 @@ def balance(request):
 def uploadCSV(request):
     return render(request, "expapp/expenseFeed.html")
 
-@login_required(login_url='/expapp/login/')
+# Clean expense line read in the document.
 def cleanExpense(expenseDict):
     for key in expenseDict:
         # log.debug(key)
@@ -380,18 +380,18 @@ def cleanExpense(expenseDict):
             else:
                 expenseDict[key] = ",".join(cleanList)
         elif key == "date":
-            dateStr = expenseDict[key][:-2] +"20"+expenseDict[key][-2:]
-            date = datetime.datetime.strptime(dateStr, "%d-%m-%Y")
-            expenseDict[key] = datetime.datetime.strftime(date, "%Y-%m-%d")
+            # dateStr = expenseDict[key][:-2] +"20"+expenseDict[key][-2:]
+            # date = datetime.datetime.strptime(dateStr, "%d-%m-%Y")
+            # expenseDict[key] = datetime.datetime.strftime(expenseDict[key], "%Y-%m-%d")
+            expenseDict[key] = expenseDict[key].strip()
         elif key == "price":
-            expenseDict[key] = expenseDict[key].replace(",",".")
+            expenseDict[key] = expenseDict[key].strip().replace(",",".")
         
         else:
             expenseDict[key] = expenseDict[key].strip()
             
     return expenseDict
 
-@login_required(login_url='expapp/login/')
 def feed(request):
     success = 0
     total = 0
@@ -409,13 +409,13 @@ def feed(request):
         for row in expenseReader:
             row = cleanExpense(row)
             try:
-                time.sleep(0.2)
+                time.sleep(0.1)
                 saveExpense(row)
             except ImportError as error:
-                log.warning("Adding expense %s on %s FAILED: a similar expense already exists." % (row["object"], row["date"]))
+                log.warning("DUPLICATED: Adding expense %s on %s FAILED: a similar expense already exists." % (row["object"], row["date"]))
                 total += 1
             except:
-                log.warning("Adding expense %s on %s FAILED: an unexpected expense occurred: %s." % (row["object"], row["date"], sys.exc_info()[0]))
+                log.warning("FAILED: Adding expense %s on %s FAILED: an unexpected expense occurred: %s." % (row["object"], row["date"], sys.exc_info()[1]))
                 total += 1
             else:            
                 success += 1
