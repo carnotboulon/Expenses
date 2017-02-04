@@ -1,0 +1,164 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+	<title>Expenses</title> 	
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    
+    <!--<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />-->
+    
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Mateialize Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    <link rel="stylesheet" href={% load static %}{% static 'ExpApp/CSS/expenseList.css' %} />
+
+</head> 
+
+<body>
+
+<!--<div class="navbar-fixed">-->
+    <nav>
+        <div class="nav-wrapper">
+            <a href={% url "expapp:index" %} class="brand-logo">&nbsp&nbsp&nbsp B&P Expenses</a>
+            <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="#" class="searchButton tooltipped" data-position="bottom" data-delay="50" data-tooltip="Search"><i class="material-icons">search</i></a></li>
+                <li class="active"><a href={% url "expapp:index" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="List View"><i class="material-icons">view_list</i></a></li>
+                <li><a href={% url "expapp:balance" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Balance"><i class="material-icons">receipt</i></a></li>
+                <li><a href={% url "expapp:download" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Download"><i class="material-icons">file_download</i></a></li>
+                <li><a href={% url "expapp:logout" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Logout"><i class="material-icons">launch</i></a></li>
+            </ul>
+            <ul class="side-nav" id="mobile-demo">
+                <li><a href="#" class="searchButton"><i class="material-icons">search</i>Search</a></li>
+                <li class="active"><a href={% url "expapp:index" %}><i class="material-icons">view_list</i>List View</a></li>
+                <li><a href={% url "expapp:balance" %} ><i class="material-icons">receipt</i>Balance</a></li>
+                <li><a href={% url "expapp:download" %}><i class="material-icons">file_download</i>Download</a></li>
+                <li><a href={% url "expapp:logout" %}><i class="material-icons">launch</i>Logout</a></li>
+            </ul>           
+        </div>
+    </nav>
+<!--</div>-->
+
+<div class="container">  
+    <div id="search" class="row valign-wrapper" style="display:none;">
+        <div class="col s4">
+            <form>
+                <div class="input-field" >
+                    <i class="material-icons prefix">search</i>
+                    <input id="icon_prefix" type="text" class="validate">
+                    <label for="icon_prefix">Search</label>
+                </div>
+            </form>
+        </div>
+        <div class="col s8 valign">
+            Tags           
+        </div>
+    </div>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="flash success">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    <ul class="collection">
+        {% for expense in expenses %}
+            <li class="collection-item avatar" onclick="$('#modal{{ expense.pk }}').modal('open');">
+                
+                {% if expense.nb_buyers > 1 %}
+                    {% load static %}
+                    <img src="{% static 'ExpApp/Pictures/iconMulti.png' %}" alt="" class="circle">
+                {% else %}
+                    
+                    {% load static %}
+                    {% with expense.account.owner.all|first|make_list|first as image_static %}
+                        {% with  'ExpApp/Pictures/icon'|add:image_static|add:'.png' as image_path%} 
+                            <img src="{% static image_path %}" alt="" class="circle"/>
+                        {% endwith %}
+                    {% endwith %}                   
+                {% endif %}
+                
+                <span class="bold">{{expense.object}}</span><span class="grey-text text-lighten-1">, {{expense.comment}}.</span>
+                <p>
+                    <b>{{expense.price}} &euro;</b>
+                </p>
+                
+                
+                {% for cat in expense.categories.all %}
+                    <span class="mybadge grey lighten-3 grey-text">{{ cat.name }}</span>
+                {% endfor %}
+                <span class="secondary-content bold">{{ expense.date|date:"d b Y" }}</span>
+                
+                {{ expense.payType.type }}
+            </li>
+             
+            <!-- Modal Bottom Sheet, triggered via JS (onclick of above li element) -->
+            <div id="modal{{ expense.pk }}" class="modal bottom-sheet">
+                <div class="modal-content">
+                        <div class="row">
+                            <div class="col s1">
+                                {% if expense.nb_buyers > 1 %}
+                                    {% load static %}
+                                        <img src="{% static 'ExpApp/Pictures/iconMulti.png' %}" style="max-width:70%;" alt="" class="circle">
+                                {% else %}
+                                    {% load static %}
+                                        {% with expense.account.owner.all|first|make_list|first as image_static %}
+                                            {% with  'ExpApp/Pictures/icon'|add:image_static|add:'.png' as image_path%} 
+                                                <img src="{% static image_path %}" style="max-width:70%;" alt="" class="circle"/>
+                                            {% endwith %}
+                                        {% endwith %}                   
+                                {% endif %}
+                            </div>
+                            <div class="col s11">
+                                <div class="row">
+                                    <div class="col s8"><span class="bold">{{expense.object}}</span></div>
+                                    <div class="col s4"><span class="teal-text text-darken-2 bold">{{ expense.date|date:"d b Y" }}</span></div>
+                                </div>
+                            
+                                <div class="row">
+                                    <div class="col s8"><span class="grey-text lighten-1">{{expense.comment}}</span></div>
+                                    <div class="col s4"><span class="bold">{{expense.price}} &euro; </span></div>
+                                </div>    
+                                
+                                <div class="row">
+                                    <div class="col s4">Bought for:<B> {{ expense.beneficiaries.all|join:"," }} </B></div>
+                                    <div class="col s4">Paid with:<B> {{ expense.payType.name }} </B></div>
+                                    <div class="col s4">Paid from:<B> {{ expense.account }} </B></div>
+                                </div>    
+                                
+                                <div class="row">
+                                    <div class="col s12">
+                                        {% for cat in expense.categories.all %}
+                                            <span class="mybadge grey lighten-3 grey-text">{{ cat.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>    
+                        
+                    <div class="modal-footer">
+                    <!--<div class="center-align">-->  
+                        <a href={% url "expapp:delete" expense.id %} class="confirmation modal-action waves-effect waves-red btn-flat">DELETE</a>
+                        <a href={% url "expapp:add" expense.id %} class=" modal-action waves-effect waves-green btn-flat">EDIT</a>
+                        <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a>
+                    </div>
+                </div>
+            </div>
+            
+        {% endfor %}    
+    
+    <!-- Modal Trigger -->
+    <div class="fixed-action-btn">
+        <a class="btn-floating btn-large red" href={% url "expapp:add" ""%}>
+            <i class="large material-icons">mode_edit</i>
+        </a>
+    </div>
+</div>  <!-- /container -->   
+    
+    
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <!-- Materialize Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+    <script src="/static/ExpApp/JS/expenseList.js"></script>
+</body>
+</html>

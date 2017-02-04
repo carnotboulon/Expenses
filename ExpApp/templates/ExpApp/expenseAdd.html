@@ -1,0 +1,237 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+	<title>Add expense</title> 	
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    
+    <!--<link rel="stylesheet" href="./resources/css/expenseList.css" />-->
+    <!--<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />-->
+    
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Mateialize Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    
+    <!--
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="./resources/JS/jqueryFinger.js"></script>
+    <script src="./resources/JS/expenseList.js"></script>
+    -->
+</head> 
+
+<body>
+
+
+<nav>
+    <div class="nav-wrapper">
+            <a href={% url "expapp:index" %} class="brand-logo">&nbsp&nbsp&nbsp B&P Expenses</a>
+            <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="#" class="searchButton tooltipped" data-position="bottom" data-delay="50" data-tooltip="Search"><i class="material-icons">search</i></a></li>
+                <li><a href={% url "expapp:index" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="List View"><i class="material-icons">view_list</i></a></li>
+                <li><a href={% url "expapp:balance" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Balance"><i class="material-icons">receipt</i></a></li>
+                <li><a href={% url "expapp:download" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Download"><i class="material-icons">file_download</i></a></li>
+                <li><a href={% url "expapp:logout" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Logout"><i class="material-icons">launch</i></a></li>
+            </ul>
+            <ul class="side-nav" id="mobile-demo">
+                <li><a href="#" class="searchButton"><i class="material-icons">search</i>Search</a></li>
+                <li><a href={% url "expapp:index" %}><i class="material-icons">view_list</i>List View</a></li>
+                <li><a href={% url "expapp:balance" %} ><i class="material-icons">receipt</i>Balance</a></li>
+                <li><a href={% url "expapp:download" %}><i class="material-icons">file_download</i>Download</a></li>
+                <li><a href={% url "expapp:logout" %}><i class="material-icons">launch</i>Logout</a></li>
+            </ul>           
+        </div>
+</nav>
+<BR>
+<div class="container">  
+  
+            <form method="post" action="/expapp/save/{{ expId }}" class="col s12">{% csrf_token %}
+                <div class="row">
+                    <div class="input-field col s12 m6">
+                        <input name="expense" type="text" class="validate" value="{{ object }}">
+                        <label for="expense">Expense</label>
+                    </div>
+                    <div class="input-field col s12 m6">
+                        <select name="categories" multiple>
+                            <option value="" disabled selected>Choose your option</option>
+                            {% for cat in categoryList %}
+                                <option {% if cat.1.selected %}selected{% endif %} value="{{ cat.1.catObject.id }}">{{ cat.0 }}</option>
+                            {% endfor %}
+                        </select>
+                        <label>Categories</label>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="input-field col s12 m6">
+                        <input name="comment" type="text" class="validate" value="{{ comment }}">
+                        <label for="comment">Comment</label>
+                    </div>
+                </div>                  
+                
+                <div class="row">
+                    <div class="input-field col s12 m4">
+                        <input name="date" type="date" value="{{date}}" class="datepicker">
+                        <label for="date">Date</label>
+                    </div>
+                    <div class="input-field col s12 m4">
+                        <i class="material-icons prefix">euro_symbol</i>
+                        <input name="price" min="0" step="0.01" type="number" class="validate" value="{{ price }}">
+                        <label for="price">Price</label>
+                    </div>
+                    <div class="input-field col s12 m4">
+                        <select name="benefs" multiple>
+                            <option value="" disabled selected>Choose your option</option>
+                            <option value="0">Tous</option>
+                            {% for p in personList %}
+                                <option {% if p.1.selected %}selected{% endif %} value="{{p.1.persObject.id}}">{{ p.1.persObject.surname }}</option>
+                            {% endfor %}
+                        </select>
+                        <label>For who</label>
+                    </div>
+                </div>
+                
+                <!--
+                <div class="row">
+                    <div class="input-field col s6">
+                        <select name="shop" multiple>
+                            <option value="" disabled selected>Choose your option</option>
+                            {% for s in shopList %}
+                                <option value="{{s.id}}">{{ s.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="shop">Shop</label>
+                    </div>
+                </div>
+                -->
+                    
+                <div class="row">
+                    <div class="input-field col s12 m6">
+                        <select name="account">
+                            <option value="" disabled selected>Choose your option</option>
+                            {% for account in accountList %}
+                                <option {% if account.1.selected %}selected{% endif %} value={{account.1.bankObject.id}}>{{ account.0 }}</option>
+                            {% endfor %}
+                        </select>
+                        <label>Bank Account</label>
+                    </div>
+                    
+                    <div class="input-field col s12 m6">
+                        <select name="payType">
+                            <option value="" disabled selected>Choose your option</option>
+                            {% for type in payTypes %}
+                                <option {% if type.1.selected %}selected{% endif %} value={{type.1.payTObject.id}}>{{ type.0 }}</option>
+                            {% endfor %}
+                        </select>
+                        <label>Paid with</label>
+                    </div>      
+                </div>
+                <input type="hidden" name="expId" value="{{expId}}" />
+            <a class="waves-effect waves-light btn" href="/expapp/"><i class="material-icons left">undo</i>Back</a>
+            <button class="btn waves-effect waves-light" type="submit" name="action">Save
+                <i class="material-icons right">send</i>
+            </button>  
+    </form>
+ 
+</div>  <!-- /container -->   
+    
+    
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <!-- Materialize Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+    <!--<script src="./resources/JS/expenseList.js"></script>-->
+    <script>
+        $(function() {
+            //TODO: Faire le edit 
+            //TODO: Ajouter une suppression de la dépense.
+            //TODO: débugger la valeur des champs quand on les mets dans l'URL.
+            
+            //Initialize select.
+            $('select').material_select();
+            
+            //Initialize datepicker
+            $('.datepicker').pickadate({
+                selectMonths: true,     // Creates a dropdown to control month
+                selectYears: 15         // Creates a dropdown of 15 years to control year
+            });
+            
+            $.urlParam = function(name){
+                var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+                //console.log(results)
+                if (results) return results[1] || 0;
+                else return null;
+            }
+            
+            //Prefill form if parameters are available.
+            if ($.urlParam('object') != null && $.urlParam('object') != "")
+            {
+                $("input[name='expense']").val($.urlParam('object'))
+            }
+            if ($.urlParam('categories') != null && $.urlParam('categories') != "")
+            {
+                //console.log($.urlParam('categories'))
+                //decodeURIComponent(encodeURIComponent("Stéphanie"))
+                $.each($.urlParam('categories').split(","), function( index, value ) {
+                    //console.log( index + ": " + value );
+                    var val = decodeURIComponent(value);
+                    $("select[name='categories'] option:contains('"+val+"')").attr("selected",true);
+                });
+                $('select').material_select();
+            }
+            if ($.urlParam('comment') != null && $.urlParam('comment') != "")
+            {
+                $("input[name='comment']").val($.urlParam('comment'))
+            }
+            if ($.urlParam('date') != null && $.urlParam('date') != "")
+            {
+                $("input[name='date']").val($.urlParam('date'))
+            }
+            if ($.urlParam('price') != null && $.urlParam('price') != "")
+            {
+                $("input[name='price']").val($.urlParam('price'))
+            }
+            if ($.urlParam('benefs') != null && $.urlParam('benefs') != "")
+            {
+                $("input[name='benefs']").val($.urlParam('price'))
+                
+                console.log($("select[name='benefs']").val())
+                $.each($.urlParam('benefs').split(","), function( index, value ) {
+                    //console.log( index + ": " + value );
+                    var val = decodeURIComponent(value);
+                    $("select[name='benefs'] option:contains('"+val+"')").attr("selected",true);
+                });
+                $('select').material_select();
+            }
+            if ($.urlParam('account') != null && $.urlParam('account') != "")
+            {
+                $("input[name='account']").val($.urlParam('account'))
+                
+                //console.log($.urlParam('account'))
+                $.each($.urlParam('account').split(","), function( index, value ) {
+                    //console.log( index + ": " + value );
+                    var val = decodeURIComponent(value);
+                    $("select[name='account'] option:contains('"+val+"')").attr("selected",true);
+                });
+                $('select').material_select();
+            }
+            if ($.urlParam('payType') != null && $.urlParam('payType') != "")
+            {
+                $("input[name='payType']").val($.urlParam('payType'))
+                
+                //console.log($.urlParam('payType'))
+                $.each($.urlParam('payType').split(","), function( index, value ) {
+                    //console.log( index + ": " + value );
+                    var val = decodeURIComponent(value);
+                    $("select[name='payType'] option:contains('"+val+"')").attr("selected",true);
+                });
+                $('select').material_select();
+            }
+            
+            
+        });
+    
+    </script>
+</body>
+</html>

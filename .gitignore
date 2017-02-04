@@ -3,8 +3,14 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+#DB
+*.sqlite3
+
 # C extensions
 *.so
+
+#Images
+*.xcf
 
 # Distribution / packaging
 .Python
