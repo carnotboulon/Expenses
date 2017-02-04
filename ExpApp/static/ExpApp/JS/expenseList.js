@@ -2,6 +2,14 @@ $(function() {
     //Side Nav bar init.
     $(".button-collapse").sideNav();
     
+    //Hide comment for small screens.
+    if ($(window).width() <= 600) 
+    {
+        $(".comment").hide();
+    }
+    
+    
+    //Modal windows.
     $('.modal').modal({
         dismissible: true, // Modal can be dismissed by clicking outside of the modal
         opacity: .5, // Opacity of modal background
@@ -21,11 +29,10 @@ $(function() {
         return confirm('Are you sure you want to delete this expense?');
     });
     
-    //$("#search").hide("blind","linear");
-    
+    //Flash messages.
     $('.flash').delay(2000).hide("blind","linear");
     
-    
+    //Seach bar.
     $(".searchButton").on("click",function(){
         if ($("#search").is(":visible")) 
         {
