@@ -25,7 +25,7 @@ SECRET_KEY = '79vsos8705x37o*7=kq18%)j&pdmp35)sr3m5)8@qu+s3@d)go'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost","bandp.synology.me"]
 
 MEDIA_ROOT = r"D:\Arnaud\Github\Expenses"
 
