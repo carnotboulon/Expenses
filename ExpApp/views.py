@@ -14,7 +14,7 @@ from ExpApp.models import Expense,Category,PayementType,BankAccount,Person, Curr
 
 import time, datetime, csv, os, sys
 import logging
-DATE_FORMAT = "%d %B, %Y"
+DATE_FORMAT = "%d %b %Y"
 
 log = logging.getLogger(__name__)
 
@@ -185,7 +185,7 @@ def add(request, expense_id):
         object = expense.object
         comment = expense.comment
         price = expense.price
-        date = expense.date.strftime(DATE_FORMAT)
+        date = expense.date.strftime("%Y-%m-%d")            # Init date format has to be "%Y-%m-%d"        
         for cat in expense.categories.all():
             if cat.name in allCats.keys():
                 allCats[cat.name]["selected"] = 1
@@ -202,7 +202,7 @@ def add(request, expense_id):
 
     else:     #expense_id not provided, initialize with empty fields.
         object = comment = price = ""
-        date = datetime.date.today().strftime(DATE_FORMAT)     
+        date = datetime.date.today().strftime("%Y-%m-%d")   # Init date format has to be "%Y-%m-%d"      
         log.info(date)
     context = {
         'object': object,
@@ -253,8 +253,12 @@ def save(request, expense_id):
     expense.comment = request.POST['comment']
     
     log.debug(request.POST['date'])
-    date = datetime.datetime.strptime(request.POST['date'], DATE_FORMAT)
-    expense.date = datetime.datetime.strftime(date, "%Y-%m-%d")
+    try:
+        date = datetime.datetime.strptime(request.POST['date'], DATE_FORMAT)
+        expense.date = datetime.datetime.strftime(date, "%Y-%m-%d")
+    except:
+        expense.date = datetime.datetime.now()
+    
     
     log.debug(request.POST['price'])
     expense.price = request.POST['price']

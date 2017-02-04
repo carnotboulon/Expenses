@@ -72,7 +72,7 @@
                 
                 <div class="row">
                     <div class="input-field col s12 m4">
-                        <input name="date" type="date" value="{{date}}" class="datepicker">
+                        <input name="date" type="date" value="{{ date }}" class="datepicker">
                         <label for="date">Date</label>
                     </div>
                     <div class="input-field col s12 m4">
@@ -148,14 +148,22 @@
             //TODO: Ajouter une suppression de la dépense.
             //TODO: débugger la valeur des champs quand on les mets dans l'URL.
             
+            //Side Nav bar init.
+            $(".button-collapse").sideNav();
+            
             //Initialize select.
             $('select').material_select();
             
             //Initialize datepicker
             $('.datepicker').pickadate({
                 selectMonths: true,     // Creates a dropdown to control month
-                selectYears: 15         // Creates a dropdown of 15 years to control year
+                selectYears: 15,         // Creates a dropdown of 15 years to control year
+                format: "dd mmm yyyy",
             });
+            var $input = $('.datepicker').pickadate()
+            // Use the picker object directly.
+            var picker = $input.pickadate('picker')
+            picker.set('select', $('.datepicker').val(), { format: 'dd mmm yyyy' }) //init value (2nd argument) can be anything, it will be overridden by the value field in the html file.
             
             $.urlParam = function(name){
                 var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
