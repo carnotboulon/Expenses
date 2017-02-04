@@ -144,8 +144,8 @@ def logoutView(request):
 @login_required(login_url='/expapp/login/')
 def index(request, expense_number = 20):
     messages.info(request, "Display the %s last expenses." % expense_number)
-    log.debug("*** INDEX PAGE ***")
-    log.debug("User: %s" % request.user)
+    log.info("*** INDEX PAGE ***")
+    log.info("User: %s" % request.user)
     
     msg_storage = get_messages(request)
     for msg in msg_storage:
