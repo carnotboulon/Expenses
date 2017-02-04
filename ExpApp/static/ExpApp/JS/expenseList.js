@@ -7,8 +7,7 @@ $(function() {
     {
         $(".comment").hide();
     }
-    
-    
+    // Test update on RPI.
     //Modal windows.
     $('.modal').modal({
         dismissible: true, // Modal can be dismissed by clicking outside of the modal
