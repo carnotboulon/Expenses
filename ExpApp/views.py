@@ -32,6 +32,7 @@ def getExpense(**kwargs):
     for k in kwargs:
         log.info("%s >> %s" % (k,kwargs[k]))
 
+# Used when CSV file is uploaded.
 def saveExpense(expenseDict):
     # Check if similar expense exists.
     # log.info("*** Saving Expense ***")
@@ -43,7 +44,9 @@ def saveExpense(expenseDict):
         # log.info("No similar expense found.")
         expense = Expense()
         expense.currency = Currency.objects.get(code="EUR")
-        expense.recordedBy = Person.objects.get(email="arnaudboland@gmail.com")
+        # expense.recordedBy = Person.objects.get(email="arnaudboland@gmail.com")
+        expense.recordedBy = Person.objects.get(email=expenseDict["recordedBy"])
+        expense.recordedOn = expenseDict["recordedOn"]
         
         log.debug(expenseDict["object"])
         expense.object = expenseDict["object"]
@@ -245,7 +248,15 @@ def save(request, expense_id):
         log.info(">> Creating new expense.")
     
     expense.currency = Currency.objects.get(code="EUR")
-    expense.recordedBy = Person.objects.get(email="arnaudboland@gmail.com")
+    
+    # django sometimes return a lazy object that can be user or anonymousUser
+    # if it's the case, user has to be extracted from lazy object.
+    user = request.user
+    if hasattr(user, '_wrapped'):
+        user = request.user._wrapped
+    
+    expense.recordedBy = Person.objects.get(email=user.email)
+    
     log.debug(request.POST['expense'])
     expense.object = request.POST['expense']
     
@@ -315,16 +326,17 @@ def download(request):
         expItem["price"] = exp.price
         expItem["categories"] = [e.name for e in exp.categories.all()]
         expItem["account"] = exp.account.name
-        expItem["buyers"] = [e.email for e in exp.account.owner.all()]
         expItem["beneficiaries"] = [e.email for e in exp.beneficiaries.all()]
         expItem["payType"] = exp.payType.name
+        expItem["recordedBy"] = exp.recordedBy.email
+        expItem["recordedOn"] = exp.recordedOn
         expList.append(expItem)
     
     # Generates the file content (header + expenses).
     fileContent = ""
-    fileContent += "object;comment;date;price;categories;account;beneficiaries;payType\n"
+    fileContent += "object;comment;date;price;categories;account;beneficiaries;payType;recordedBy;recordedOn\n"
     for exp in expList:
-        extStr = "%s ; %s ; %s ; %s ; %s ; %s ; %s ; %s\n" % (exp["object"],exp["comment"],exp["date"],("%.2f" % exp["price"]).replace(".",","), ",".join(exp["categories"]), exp["account"], ",".join(exp["beneficiaries"]), exp["payType"]) 
+        extStr = "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n" % (exp["object"],exp["comment"],exp["date"],("%.2f" % exp["price"]).replace(".",","), ",".join(exp["categories"]), exp["account"], ",".join(exp["beneficiaries"]), exp["payType"], exp["recordedBy"],exp["recordedOn"]) 
         fileContent += extStr.encode("utf-8")
     
     response = HttpResponse(fileContent, content_type='text/csv')
