@@ -116,6 +116,7 @@ def computeBalance():
 # Create your views here.
 
 def loginView(request):
+    log.info("> LOGIN PAGE")
     next = ""
     if "next" in request.GET:
         next = request.GET["next"]
@@ -123,6 +124,7 @@ def loginView(request):
         user = authenticate(username=request.POST["login"], password=request.POST["password"])
         if user is not None:
             login(request, user)
+            log.info(">>> %s logged IN." % user)
             # A backend authenticated the credentials
             if next:
                 log.debug("Redirecting to next: %s" % next)
@@ -141,18 +143,18 @@ def loginView(request):
 
 @login_required(login_url='/expapp/login/')
 def logoutView(request):
+    log.info("<<< %s logged OUT." % request.user)
     logout(request)
     return redirect("/expapp/login/")
         
 @login_required(login_url='/expapp/login/')
 def index(request, expense_number = 20):
+    log.info("> INDEX PAGE, User: %s" % request.user)
     messages.info(request, "Display the %s last expenses." % expense_number)
-    log.info("*** INDEX PAGE ***")
-    log.info("User: %s" % request.user)
     
     msg_storage = get_messages(request)
     for msg in msg_storage:
-        log.debug("[MESSAGE]: %s" % msg)
+        log.debug("[FLASH]: %s" % msg)
     
     expense_number = min(int(expense_number), 1000)
     latest_expenses_list = Expense.objects.order_by('-date')[:expense_number]
@@ -164,6 +166,7 @@ def index(request, expense_number = 20):
 
 @login_required(login_url='/expapp/login/') 
 def add(request, expense_id):
+    log.info("> ADD PAGE, User: %s" % request.user)
     # Collects all lists and add a field to check of the item is selected.
     allCats = {}
     for cat in Category.objects.all():
@@ -206,7 +209,6 @@ def add(request, expense_id):
     else:     #expense_id not provided, initialize with empty fields.
         object = comment = price = ""
         date = datetime.date.today().strftime("%Y-%m-%d")   # Init date format has to be "%Y-%m-%d"      
-        log.info(date)
     context = {
         'object': object,
         'categoryList': sorted(allCats.items()),
@@ -223,6 +225,7 @@ def add(request, expense_id):
 
 @login_required(login_url='/expapp/login/')
 def delete(request, expense_id):
+    log.info("> DELETE PAGE, User: %s" % request.user)
     if expense_id:
         log.info("*** REMOVING Expense %s ***" % expense_id)
         expense = get_object_or_404(Expense, pk=expense_id)
@@ -314,6 +317,7 @@ def save(request, expense_id):
 
 @login_required(login_url='/expapp/login/')    
 def download(request):
+    log.info("> DOWNLOAD PAGE, User: %s" % request.user)
     expenses = Expense.objects.all()
     expList = []
     # Go through expenses and store them in a dict. 
@@ -346,8 +350,9 @@ def download(request):
 
 @login_required(login_url='/expapp/login/')    
 def balance(request):
+    log.info("> BALANCE PAGE, User: %s" % request.user)
     balance = computeBalance()
-    log.info(balance)
+    log.debug(balance)
     
     messages = {}
     for p in balance.keys():
@@ -355,8 +360,8 @@ def balance(request):
         msgExpense = "%s spent %.2f EUR" % (pName, balance[p]["exp"])
         msgBenefs = "%.2f EUR of the expenses were for %s" % (balance[p]["benef"], pName)
         
-        log.info(msgExpense)
-        log.info(msgBenefs)
+        log.debug(msgExpense)
+        log.debug(msgBenefs)
         
         messages[pName] = []
         messages[pName].append(msgExpense)
@@ -365,20 +370,17 @@ def balance(request):
         personalBalance = balance[p]["exp"] - balance[p]["benef"]
         if personalBalance > 0.01:
             message = "%s needs %.2f EUR back." % (pName, abs(personalBalance)) 
-            log.info(message)
             messages[pName].append(message)
         elif personalBalance < 0.01:
             message = "%s ows %.2f EUR." % (pName, abs(personalBalance)) 
-            log.info(message)
             messages[pName].append(message)
         else:
             message.append("Accounts are balanced!")
-            log.info(message)
             messages[pName].append(message)
     
     messages = messages.items()
     context = {'balanceMessages': messages}
-    log.info(messages)
+    log.debug(messages)
     return render(request, "expapp/balance.html",context)
 
 @login_required(login_url='/expapp/login/')
@@ -409,6 +411,7 @@ def cleanExpense(expenseDict):
     return expenseDict
 
 def feed(request):
+    
     success = 0
     total = 0
     
