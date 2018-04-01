@@ -54,7 +54,7 @@
                     </div>
                     <div class="input-field col s12 m6">
                         <select name="categories" multiple>
-                            <option value="" disabled selected>Choose your option</option>
+                            <option value="" disabled selected>Choose your category</option>
                             {% for cat in categoryList %}
                                 <option {% if cat.1.selected %}selected{% endif %} value="{{ cat.1.catObject.id }}">{{ cat.0 }}</option>
                             {% endfor %}
@@ -64,23 +64,34 @@
                 </div>
                 
                 <div class="row">
-                    <div class="input-field col s12 m6">
+                    <div class="input-field col s12 m12">
                         <input name="comment" type="text" class="validate" value="{{ comment }}">
                         <label for="comment">Comment</label>
                     </div>
                 </div>                  
                 
                 <div class="row">
-                    <div class="input-field col s12 m4">
+                    <div class="input-field col s12 m3">
                         <input name="date" type="date" value="{{ date }}" class="datepicker">
                         <label for="date">Date</label>
                     </div>
-                    <div class="input-field col s12 m4">
-                        <i class="material-icons prefix">euro_symbol</i>
+                    <div class="input-field col s12 m3">
                         <input name="price" min="0" step="0.01" type="number" class="validate" value="{{ price }}">
                         <label for="price">Price</label>
                     </div>
-                    <div class="input-field col s12 m4">
+					<div class="input-field col s12 m3">
+						<!-- Switch -->
+						<div class="switch">
+							<label>
+								CHF
+							<input name="currency" type="checkbox" >
+							<span class="lever"></span>
+								EUR
+							</label>
+						</div>
+					</div>
+					
+                    <div class="input-field col s12 m3">
                         <select name="benefs" multiple>
                             <option value="" disabled selected>Choose your option</option>
                             <option value="0">Tous</option>

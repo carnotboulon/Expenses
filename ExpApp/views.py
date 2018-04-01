@@ -252,7 +252,7 @@ def save(request, expense_id):
 		expense = Expense()
 		log.info(">> Creating new expense.")
     
-	expense.currency = Currency.objects.get(code="EUR")
+	
     
 	# django sometimes return a lazy object that can be user or anonymousUser
 	# if it's the case, user has to be extracted from lazy object.
@@ -278,7 +278,16 @@ def save(request, expense_id):
     
 	log.debug(request.POST['price'])
 	expense.price = request.POST['price']
-    
+	
+	# Currency is selected with a switch. Switch off = CHF, switch on = EUR.
+	if "currency" in request.POST:
+		# Switch on
+		expense.currency = Currency.objects.get(code="EUR")
+		log.debug("Expense in EURO")
+	else:
+		expense.currency = Currency.objects.get(code="CHF")
+		log.debug("Expense in CHF")
+		
 	account = get_object_or_404(BankAccount, pk=request.POST['account'])
 	log.debug(account)
 	expense.account = account
@@ -292,7 +301,7 @@ def save(request, expense_id):
 	catList = request.POST.getlist('categories')
 	categories = [get_object_or_404(Category, pk=c) for c in catList]
 	log.debug(categories)
-	expense.categories = categories
+	expense.categories.set(categories)
     
     # Retrieve beneficiaries.
 	benefsList = request.POST.getlist('benefs')
@@ -303,7 +312,7 @@ def save(request, expense_id):
 	else:
 		benefs = [get_object_or_404(Person, pk=b) for b in benefsList]
 	log.debug(benefs)
-	expense.beneficiaries = benefs
+	expense.beneficiaries.set(benefs)
     
 	expense.save()
     

@@ -169,7 +169,7 @@ LOGGING = {
         },
         'ExpApp.views': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'filters': ['require_debug_true']
         }
     }
