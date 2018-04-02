@@ -172,7 +172,7 @@ def add(request, expense_id):
 	# Collects all lists and add a field to check of the item is selected.
 	allCats = {}
 	for cat in Category.objects.all():
-		allCats[cat.name] = {"catObject": cat, "selected":0}
+		allCats[cat.name] = {"catObject": cat, "active":cat.active, "selected":0}
 
 	allPers = {}
 	for pers in Person.objects.all():
@@ -339,6 +339,7 @@ def download(request):
 		expItem["object"] = exp.object
 		expItem["comment"] = exp.comment
 		expItem["price"] = exp.price
+		expItem["currency"] = exp.currency.code
 		expItem["categories"] = [e.name for e in exp.categories.all()]
 		expItem["account"] = exp.account.name
 		expItem["beneficiaries"] = [e.email for e in exp.beneficiaries.all()]
@@ -349,11 +350,11 @@ def download(request):
     
 	# Generates the file content (header + expenses).
 	fileContent = ""
-	fileContent += "object;comment;date;price;categories;account;beneficiaries;payType;recordedBy;recordedOn\n"
+	fileContent += "object;comment;date;price;currency;categories;account;beneficiaries;payType;recordedBy;recordedOn\n"
 	for exp in expList:
-		extStr = "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n" % (exp["object"],exp["comment"],exp["date"],("%.2f" % exp["price"]).replace(".",","), ",".join(exp["categories"]), exp["account"], ",".join(exp["beneficiaries"]), exp["payType"], exp["recordedBy"],exp["recordedOn"]) 
-		fileContent += extStr.encode("utf-8")
-    
+		extStr = "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n" % (exp["object"],exp["comment"],exp["date"],("%.2f" % exp["price"]).replace(".",","),exp["currency"], ",".join(exp["categories"]), exp["account"], ",".join(exp["beneficiaries"]), exp["payType"], exp["recordedBy"],exp["recordedOn"]) 
+		fileContent += extStr
+	log.info(fileContent)
 	response = HttpResponse(fileContent, content_type='text/csv')
 	response['Content-Disposition'] = "attachment; filename=ExportDB-%s.csv" % time.strftime("%d%b%y")
     
