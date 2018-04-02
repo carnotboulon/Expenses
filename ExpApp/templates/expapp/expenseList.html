@@ -133,19 +133,17 @@
                                     <div class="col s4">Paid with:<B> {{ expense.payType.name }} </B></div>
                                     <div class="col s4">Paid from:<B> {{ expense.account }} </B></div>
                                 </div>    
-                                
                                 <div class="row">
+                                    <div class="col s4">Recorded By: <B>{{ expense.recordedBy.surname }}</B></div>
+                                    <div class="col s4">Recorded On: <B>{{ expense.recordedOn }}</B></div>
+                                </div>
+								<div class="row">
                                     <div class="col s12">
                                         {% for cat in expense.categories.all %}
                                             <span class="mybadge grey lighten-3 grey-text">{{ cat.name }}</span>
                                         {% endfor %}
                                     </div>
                                     
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col s6">Recorded By: <B>{{ expense.recordedBy.surname }}</B></div>
-                                    <div class="col s6">Recorded On: <B>{{ expense.recordedOn }}</B></div>
                                 </div>
                             </div>
                         </div>    
