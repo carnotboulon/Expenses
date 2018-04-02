@@ -251,9 +251,7 @@ def save(request, expense_id):
 	else:
 		expense = Expense()
 		log.info(">> Creating new expense.")
-    
-	
-    
+
 	# django sometimes return a lazy object that can be user or anonymousUser
 	# if it's the case, user has to be extracted from lazy object.
 	user = request.user

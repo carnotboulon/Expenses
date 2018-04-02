@@ -119,23 +119,19 @@
                             </div>
                             <div class="col s11">
                                 <div class="row">
-                                    <div class="col s8"><span class="bold">{{expense.object}}</span></div>
-                                    <div class="col s4"><span class="teal-text text-darken-2 bold">{{ expense.date|date:"d b Y" }}</span></div>
-                                </div>
-                            
+                                    <div class="col s3"><span class="teal-text text-darken-2 bold">{{ expense.date|date:"d b Y" }}</span></div>
+									<div class="col s3"><span class="bold">{{expense.object}}</span></div>
+                                    <div class="col s4"><span class="grey-text lighten-1">{{expense.comment}}</span></div>
+									<div class="col s2"><span class="bold">{{expense.price}} &euro; </span></div>
+                                </div>                                
                                 <div class="row">
-                                    <div class="col s8"><span class="grey-text lighten-1">{{expense.comment}}</span></div>
-                                    <div class="col s4"><span class="bold">{{expense.price}} &euro; </span></div>
-                                </div>    
-                                
-                                <div class="row">
-                                    <div class="col s4">Bought for:<B> {{ expense.beneficiaries.all|join:"," }} </B></div>
-                                    <div class="col s4">Paid with:<B> {{ expense.payType.name }} </B></div>
-                                    <div class="col s4">Paid from:<B> {{ expense.account }} </B></div>
+                                    <div class="col s3">Bought for:<B> {{ expense.beneficiaries.all|join:"," }} </B></div>
+                                    <div class="col s3">Paid with:<B> {{ expense.payType.name }} </B></div>
+                                    <div class="col s3">Paid from:<B> {{ expense.account }} </B></div>
                                 </div>    
                                 <div class="row">
-                                    <div class="col s4">Recorded By: <B>{{ expense.recordedBy.surname }}</B></div>
-                                    <div class="col s4">Recorded On: <B>{{ expense.recordedOn }}</B></div>
+                                    <div class="col s3">Recorded By: <B>{{ expense.recordedBy.surname }}</B></div>
+                                    <div class="col s3">Recorded On: <B>{{ expense.recordedOn }}</B></div>
                                 </div>
 								<div class="row">
                                     <div class="col s12">
