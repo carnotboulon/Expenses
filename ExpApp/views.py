@@ -354,7 +354,6 @@ def download(request):
 	for exp in expList:
 		extStr = "%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s\n" % (exp["object"],exp["comment"],exp["date"],("%.2f" % exp["price"]).replace(".",","),exp["currency"], ",".join(exp["categories"]), exp["account"], ",".join(exp["beneficiaries"]), exp["payType"], exp["recordedBy"],exp["recordedOn"]) 
 		fileContent += extStr
-	log.info(fileContent)
 	response = HttpResponse(fileContent, content_type='text/csv')
 	response['Content-Disposition'] = "attachment; filename=ExportDB-%s.csv" % time.strftime("%d%b%y")
     
