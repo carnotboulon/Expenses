@@ -31,6 +31,7 @@
                 <!--
 				<li><a href="#" class="searchButton tooltipped" data-position="bottom" data-delay="50" data-tooltip="Search"><i class="material-icons">search</i></a></li>
                 -->
+				<li><a href={% url "expapp:shortcuts" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Shortcuts"><i class="material-icons">view_module</i></a></li>
 				<li><a href={% url "expapp:index" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="List View"><i class="material-icons">view_list</i></a></li>
                 <!--
 				<li><a href={% url "expapp:balance" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Balance"><i class="material-icons">receipt</i></a></li>
@@ -40,7 +41,8 @@
             </ul>
             <ul class="side-nav" id="mobile-demo">
                 <li><a href="#" class="searchButton"><i class="material-icons">search</i>Search</a></li>
-                <li><a href={% url "expapp:index" %}><i class="material-icons">view_list</i>List View</a></li>
+                <li class><a href={% url "expapp:shortcuts" %}><i class="material-icons">view_module</i>Shortcuts</a></li>
+				<li><a href={% url "expapp:index" %}><i class="material-icons">view_list</i>List View</a></li>
                 <!--
 				<li><a href={% url "expapp:balance" %} ><i class="material-icons">receipt</i>Balance</a></li>
                 -->
@@ -86,7 +88,7 @@
 					
                     <div class="input-field col s7 m3">
                         <input name="price" min="0" step="0.01" type="number" class="validate" value="{{ price }}">
-                        <label for="price">Price</label>
+                        <label for="price" data-error="wrong" data-success="right">Price</label>
                     </div>
 					
 					<div class="input-field col s5 m3">
@@ -196,7 +198,7 @@
             //Prefill form if parameters are available.
             if ($.urlParam('object') != null && $.urlParam('object') != "")
             {
-                $("input[name='expense']").val($.urlParam('object'))
+                $("input[name='expense']").val(decodeURIComponent($.urlParam('object')))
             }
             if ($.urlParam('categories') != null && $.urlParam('categories') != "")
             {
@@ -211,7 +213,7 @@
             }
             if ($.urlParam('comment') != null && $.urlParam('comment') != "")
             {
-                $("input[name='comment']").val($.urlParam('comment'))
+                $("input[name='comment']").val(decodeURIComponent($.urlParam('comment')))
             }
             if ($.urlParam('date') != null && $.urlParam('date') != "")
             {
@@ -220,6 +222,14 @@
             if ($.urlParam('price') != null && $.urlParam('price') != "")
             {
                 $("input[name='price']").val($.urlParam('price'))
+            }
+			if ($.urlParam('currency') != null && $.urlParam('currency') != "")
+            {
+                if($.urlParam('currency') == "EUR")
+				{
+						$("input[name='currency']").prop("checked",true);
+				}
+				
             }
             if ($.urlParam('benefs') != null && $.urlParam('benefs') != "")
             {

@@ -160,12 +160,17 @@ def index(request, expense_number = 20):
     
 	expense_number = min(int(expense_number), 1000)
 	latest_expenses_list = Expense.objects.order_by('-date')[:expense_number]
-	template = loader.get_template('expapp/expenseList.html')
-    
+	
 	context = {'expenses': latest_expenses_list}
     
 	return render(request, "expapp/expenseList.html",context)
 
+@login_required(login_url='/expapp/login/')
+def shortcuts(request):
+	log.info("> SHORTCUTS PAGE, User: %s" % request.user)
+	context = {}
+	return render(request, "expapp/shortcuts.html",context)
+	
 @login_required(login_url='/expapp/login/') 
 def add(request, expense_id):
 	log.info("> ADD PAGE, User: %s" % request.user)

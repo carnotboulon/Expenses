@@ -23,7 +23,8 @@
             <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
             <ul class="right hide-on-med-and-down">
                 <li><a href="#" class="searchButton tooltipped" data-position="bottom" data-delay="50" data-tooltip="Search"><i class="material-icons">search</i></a></li>
-                <li class="active"><a href={% url "expapp:index" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="List View"><i class="material-icons">view_list</i></a></li>
+                <li><a href={% url "expapp:shortcuts" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Shortcuts"><i class="material-icons">view_module</i></a></li>
+				<li class="active"><a href={% url "expapp:index" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="List View"><i class="material-icons">view_list</i></a></li>
                 <!--
 				<li><a href={% url "expapp:balance" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Balance"><i class="material-icons">receipt</i></a></li>
                 -->
@@ -32,7 +33,8 @@
             </ul>
             <ul class="side-nav" id="mobile-demo">
                 <li><a href="#" class="searchButton"><i class="material-icons">search</i>Search</a></li>
-                <li class="active"><a href={% url "expapp:index" %}><i class="material-icons">view_list</i>List View</a></li>
+                <li class><a href={% url "expapp:shortcuts" %}><i class="material-icons">view_module</i>Shortcuts</a></li>
+				<li class="active"><a href={% url "expapp:index" %}><i class="material-icons">view_list</i>List View</a></li>
                 <!--
 				<li><a href={% url "expapp:balance" %} ><i class="material-icons">receipt</i>Balance</a></li>
                 -->
@@ -154,7 +156,7 @@
             </div>
             
         {% endfor %}    
-    
+    </ul>
     <!-- Modal Trigger -->
     <div class="fixed-action-btn">
         <a class="btn-floating btn-large red" href={% url "expapp:add" ""%}>
