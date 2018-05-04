@@ -6,7 +6,8 @@ from . import views
 app_name = 'expapp'
 
 urlpatterns = [
-    url(r'^$', views.shortcuts, name='index'),
+    url(r'^$', views.shortcuts, name='shortcuts'),
+    url(r'^list', views.index, name='index'),
 	url(r'^shortcuts', views.shortcuts, name='shortcuts'),
     url(r'^login', views.loginView, name="login"),
     url(r'^logout', views.logoutView, name="logout"),
