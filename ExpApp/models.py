@@ -79,3 +79,18 @@ class Expense(models.Model):
 		cats = [c.name for c in self.categories.all()]
         
 		return "[%s] %s %s" % (self.date, self.object, ",".join(cats))
+		
+# class Shortcut(models.Model):
+	# name = models.CharField(max_length=32)
+	# user = models.ManyToManyField(Person)
+	# picture = ImageField(upload_to="shortcuts", blank=True, null=True, height_field=400, width_field=400)
+	
+	# object = models.CharField(max_length=32)
+	# comment = models.CharField(max_length=200)
+	# price = models.CharField(max_length=32)
+	# currency = models.CharField(max_length=3)
+	# category = models.CharField(max_length=32)
+	# account = models.CharField(max_length=32)
+	# payType = models.CharField(max_length=32)
+    
+	# beneficiaries = models.CharField(max_length=32)
