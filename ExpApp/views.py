@@ -327,7 +327,7 @@ def save(request, expense_id):
 	log.info(message)
 	messages.info(request, message)
     
-	return redirect('/expapp/')
+	return redirect('/expapp/list/')
 
 @login_required(login_url='/expapp/login/')    
 def download(request):

@@ -80,6 +80,7 @@ class Expense(models.Model):
         
 		return "[%s] %s %s" % (self.date, self.object, ",".join(cats))
 		
+# # Automatisation de creation de raccourcis.
 # class Shortcut(models.Model):
 	# name = models.CharField(max_length=32)
 	# user = models.ManyToManyField(Person)
