@@ -158,7 +158,7 @@ def index(request, expense_number = 20):
 	for msg in msg_storage:
 		log.debug("[FLASH]: %s" % msg)
     
-	expense_number = min(int(expense_number), 1000)
+	expense_number = min(int(expense_number), 100)
 	latest_expenses_list = Expense.objects.order_by('-date')[:expense_number]
 	
 	context = {'expenses': latest_expenses_list}
@@ -329,6 +329,44 @@ def save(request, expense_id):
     
 	return redirect('/expapp/list/')
 
+@login_required(login_url='/expapp/login/')
+def report(request):
+	log.info("> REPORT PAGE, User: %s" % request.user)
+	
+	# Daily Expenses
+	daily_expenses = Expense.objects.filter(date__gte=datetime.date.today())
+	dailyExpEUR = 0
+	dailyExpCHF = 0
+	for exp in daily_expenses:
+		if exp.currency.code == "EUR":
+			dailyExpEUR += exp.price
+		else:
+			dailyExpCHF += exp.price
+			
+	# Weekly Expenses
+	weekly_expenses = Expense.objects.filter(date__week=datetime.date.today().strftime("%V")).filter(date__year=datetime.date.today().strftime("%Y"))
+	weeklyExpEUR = 0
+	weeklyExpCHF = 0
+	for exp in weekly_expenses:
+		if exp.currency.code == "EUR":
+			weeklyExpEUR += exp.price
+		else:
+			weeklyExpCHF += exp.price
+	
+	# Monthly Expenses
+	monthly_expenses = Expense.objects.filter(date__month=datetime.date.today().strftime("%m")).filter(date__year=datetime.date.today().strftime("%Y"))
+	monthlyExpEUR = 0
+	monthlyExpCHF = 0
+	for exp in monthly_expenses:
+		if exp.currency.code == "EUR":
+			monthlyExpEUR += exp.price
+		else:
+			monthlyExpCHF += exp.price
+	
+	context = {"dayCHF": dailyExpCHF, "dayEUR": dailyExpEUR, "weekCHF": weeklyExpCHF, "weekEUR": weeklyExpEUR, "monthCHF": monthlyExpCHF, "monthEUR": monthlyExpEUR}
+	log.info(context)
+	return render(request, "expapp/report.html",context)
+	
 @login_required(login_url='/expapp/login/')    
 def download(request):
 	log.info("> DOWNLOAD PAGE, User: %s" % request.user)

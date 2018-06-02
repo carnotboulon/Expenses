@@ -1,0 +1,101 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+	<title>Expenses</title> 	
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    
+    <!--<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />-->
+    
+    <!--Import Google Icon Font-->
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Mateialize Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    <link rel="stylesheet" href={% load static %}{% static 'ExpApp/CSS/expenseList.css' %} />
+
+</head> 
+
+<body>
+
+<!--<div class="navbar-fixed">-->
+    <nav>
+        <div class="nav-wrapper">
+            <a href={% url "expapp:index" %} class="brand-logo">&nbsp&nbsp&nbsp B&P Expenses</a>
+            <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="#" class="searchButton tooltipped" data-position="bottom" data-delay="50" data-tooltip="Search"><i class="material-icons">search</i></a></li>
+                <li><a href={% url "expapp:shortcuts" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Shortcuts"><i class="material-icons">view_module</i></a></li>
+				<li class="active"><a href={% url "expapp:index" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="List View"><i class="material-icons">view_list</i></a></li>
+                <!--
+				<li><a href={% url "expapp:balance" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Balance"><i class="material-icons">receipt</i></a></li>
+                -->
+				<li><a href={% url "expapp:download" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Download"><i class="material-icons">file_download</i></a></li>
+                <li><a href={% url "expapp:logout" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Logout"><i class="material-icons">launch</i></a></li>
+            </ul>
+            <ul class="side-nav" id="mobile-demo">
+                <li><a href="#" class="searchButton"><i class="material-icons">search</i>Search</a></li>
+                <li class><a href={% url "expapp:shortcuts" %}><i class="material-icons">view_module</i>Shortcuts</a></li>
+				<li class="active"><a href={% url "expapp:index" %}><i class="material-icons">view_list</i>List View</a></li>
+                <!--
+				<li><a href={% url "expapp:balance" %} ><i class="material-icons">receipt</i>Balance</a></li>
+                -->
+				<li><a href={% url "expapp:download" %}><i class="material-icons">file_download</i>Download</a></li>
+                <li><a href={% url "expapp:logout" %}><i class="material-icons">launch</i>Logout</a></li>
+            </ul>           
+        </div>
+    </nav>
+<!--</div>-->
+
+<div class="container">  
+    <div id="search" class="row valign-wrapper" style="display:none;">
+        <div class="col s4">
+            <form>
+                <div class="input-field" >
+                    <i class="material-icons prefix">search</i>
+                    <input id="icon_prefix" type="text" class="validate">
+                    <label for="icon_prefix">Search</label>
+                </div>
+            </form>
+        </div>
+        <div class="col s8 valign">
+            Tags           
+        </div>
+    </div>
+    
+	<table class="striped">
+        <thead>
+          <tr>
+              <th>Period</th>
+              <th>CHF</th>
+              <th>EUR</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>Today</td>
+            <td>{{ dayCHF }}</td>
+            <td>{{ dayEUR }}</td>
+          </tr>
+          <tr>
+            <td>This week</td>
+            <td>{{ weekCHF }}</td>
+            <td>{{ weekEUR }}</td>
+          </tr>
+          <tr>
+            <td>This month</td>
+            <td>{{ monthCHF }}</td>
+            <td>{{ monthEUR }}</td>
+          </tr>
+        </tbody>
+      </table>
+    
+</div>  <!-- /container -->   
+    
+    
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <!-- Materialize Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+    <script src="/static/ExpApp/JS/expenseList.js"></script>
+</body>
+</html>

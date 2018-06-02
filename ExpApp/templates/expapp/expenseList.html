@@ -124,7 +124,15 @@
                                     <div class="col s3"><span class="teal-text text-darken-2 bold">{{ expense.date|date:"d b Y" }}</span></div>
 									<div class="col s3"><span class="bold">{{expense.object}}</span></div>
                                     <div class="col s4"><span class="grey-text lighten-1">{{expense.comment}}</span></div>
-									<div class="col s2"><span class="teal-text bold">{{expense.price}} &euro; </span></div>
+									<div class="col s2">
+										<span class="teal-text bold">
+											{{expense.price}} 
+											{% if expense.currency.code == "EUR" %}
+												&euro;
+											{% else %}
+												CHF
+											{% endif %}
+										</span></div>
                                 </div>                                
                                 <div class="row">
                                     <div class="col s3">Bought for:<B> {{ expense.beneficiaries.all|join:"," }} </B></div>
