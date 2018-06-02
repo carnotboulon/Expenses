@@ -25,20 +25,16 @@
                 <li><a href="#" class="searchButton tooltipped" data-position="bottom" data-delay="50" data-tooltip="Search"><i class="material-icons">search</i></a></li>
                 <li><a href={% url "expapp:shortcuts" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Shortcuts"><i class="material-icons">view_module</i></a></li>
 				<li class="active"><a href={% url "expapp:index" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="List View"><i class="material-icons">view_list</i></a></li>
-                <!--
-				<li><a href={% url "expapp:balance" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Balance"><i class="material-icons">receipt</i></a></li>
-                -->
-				<li><a href={% url "expapp:download" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Download"><i class="material-icons">file_download</i></a></li>
+                <li><a href={% url "expapp:report" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Report"><i class="material-icons">receipt</i></a></li>
+                <li><a href={% url "expapp:download" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Download"><i class="material-icons">file_download</i></a></li>
                 <li><a href={% url "expapp:logout" %} class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Logout"><i class="material-icons">launch</i></a></li>
             </ul>
             <ul class="side-nav" id="mobile-demo">
                 <li><a href="#" class="searchButton"><i class="material-icons">search</i>Search</a></li>
                 <li class><a href={% url "expapp:shortcuts" %}><i class="material-icons">view_module</i>Shortcuts</a></li>
 				<li class="active"><a href={% url "expapp:index" %}><i class="material-icons">view_list</i>List View</a></li>
-                <!--
-				<li><a href={% url "expapp:balance" %} ><i class="material-icons">receipt</i>Balance</a></li>
-                -->
-				<li><a href={% url "expapp:download" %}><i class="material-icons">file_download</i>Download</a></li>
+                <li><a href={% url "expapp:report" %} ><i class="material-icons">receipt</i>Report</a></li>
+                <li><a href={% url "expapp:download" %}><i class="material-icons">file_download</i>Download</a></li>
                 <li><a href={% url "expapp:logout" %}><i class="material-icons">launch</i>Logout</a></li>
             </ul>           
         </div>
