@@ -334,7 +334,7 @@ def report(request):
 	log.info("> REPORT PAGE, User: %s" % request.user)
 	
 	# Daily Expenses
-	daily_expenses = Expense.objects.filter(date__gte=datetime.date.today())
+	daily_expenses = Expense.objects.filter(date__gte=datetime.date.today()).exclude(categories__name= "SWISSto12")
 	dailyExpEUR = 0
 	dailyExpCHF = 0
 	for exp in daily_expenses:
@@ -344,7 +344,7 @@ def report(request):
 			dailyExpCHF += exp.price
 			
 	# Weekly Expenses
-	weekly_expenses = Expense.objects.filter(date__week=datetime.date.today().strftime("%V")).filter(date__year=datetime.date.today().strftime("%Y"))
+	weekly_expenses = Expense.objects.filter(date__week=datetime.date.today().strftime("%V")).filter(date__year=datetime.date.today().strftime("%Y")).exclude(categories__name= "SWISSto12")
 	weeklyExpEUR = 0
 	weeklyExpCHF = 0
 	for exp in weekly_expenses:
@@ -354,7 +354,7 @@ def report(request):
 			weeklyExpCHF += exp.price
 	
 	# Monthly Expenses
-	monthly_expenses = Expense.objects.filter(date__month=datetime.date.today().strftime("%m")).filter(date__year=datetime.date.today().strftime("%Y"))
+	monthly_expenses = Expense.objects.filter(date__month=datetime.date.today().strftime("%m")).filter(date__year=datetime.date.today().strftime("%Y")).exclude(categories__name= "SWISSto12")
 	monthlyExpEUR = 0
 	monthlyExpCHF = 0
 	for exp in monthly_expenses:
