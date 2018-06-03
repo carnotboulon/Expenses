@@ -364,7 +364,7 @@ def report(request):
 			monthlyExpCHF += exp.price
 	
 	context = {"dayCHF": dailyExpCHF, "dayEUR": dailyExpEUR, "weekCHF": weeklyExpCHF, "weekEUR": weeklyExpEUR, "monthCHF": monthlyExpCHF, "monthEUR": monthlyExpEUR}
-	log.info(context)
+	log.debug(context)
 	return render(request, "expapp/report.html",context)
 	
 @login_required(login_url='/expapp/login/')    
