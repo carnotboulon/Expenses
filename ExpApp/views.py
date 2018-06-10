@@ -334,7 +334,7 @@ def report(request):
 	log.info("> REPORT PAGE, User: %s" % request.user)
 	
 	# Daily Expenses
-	daily_expenses = Expense.objects.filter(date__gte=datetime.date.today()).exclude(categories__name= "SWISSto12")
+	daily_expenses = Expense.objects.filter(date__exact=datetime.date.today()).exclude(categories__name= "SWISSto12")
 	dailyExpEUR = 0
 	dailyExpCHF = 0
 	for exp in daily_expenses:
