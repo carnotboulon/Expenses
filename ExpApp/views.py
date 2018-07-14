@@ -158,7 +158,7 @@ def index(request, expense_number = 20):
 	for msg in msg_storage:
 		log.debug("[FLASH]: %s" % msg)
     
-	expense_number = min(int(expense_number), 100)
+	expense_number = min(int(expense_number), 1000)
 	latest_expenses_list = Expense.objects.order_by('-date')[:expense_number]
 	
 	context = {'expenses': latest_expenses_list}
